@@ -1072,12 +1072,10 @@
                    :allow-other-keys allow-other-keys))))
 
 ;;; ensure method
-
 (defun ensure-method (gf &rest all-keys)
     (let ((new-method
             (apply
-             (if (equal (generic-function-method-class gf)
-                        the-class-standard-method)
+             (if (equal (generic-function-method-class gf) the-class-standard-method)
                  #'make-instance-standard-method
                  #'make-instance)
              (generic-function-method-class gf)
