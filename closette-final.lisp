@@ -240,10 +240,6 @@
                      (slot-value object sn))))
     (values))
 
-#+nil (defmethod describe-object ((object t) stream)
-          (common-lisp:describe object)
-          (values))
-
 (defmethod describe-object ((object t) stream)
     (describe object)
     (values))
