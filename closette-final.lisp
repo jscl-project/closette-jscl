@@ -223,6 +223,8 @@
 
 ;;;
 ;;; describe-object is a handy tool for enquiring minds:
+;;;
+;;; todo: format
 (defgeneric describe-object (object stream))
 (defmethod describe-object ((object standard-object) stream)
     (format t "A Closette object~
