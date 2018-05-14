@@ -133,7 +133,7 @@
                                (class-slots (class-of new))))))
         (apply #'shared-initialize new added-slots initargs)))
 
-;;;  todo:
+;;;  todo: format
 ;;;  Methods having to do with class metaobjects.
 ;;;
 (defmethod print-object ((class standard-class) stream)
