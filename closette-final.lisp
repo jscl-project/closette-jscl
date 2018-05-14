@@ -167,7 +167,7 @@
     ((class standard-class) direct-slots)
     (std-compute-effective-slot-definition class direct-slots))
 
-;;; todo:
+;;; todo: format
 ;;;
 ;;; Methods having to do with generic function metaobjects.
 ;;;
