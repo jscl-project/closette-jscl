@@ -12,6 +12,9 @@
 
 ;;; Slot access
 
+;;; slot-value-using-class
+;;; its slippery moment
+;;;
 (defgeneric slot-value-using-class (class instance slot-name))
 (defmethod slot-value-using-class
     ((class standard-class) instance slot-name)
@@ -23,32 +26,36 @@
     (setf (std-slot-value instance slot-name) new-value))
 ;;; N.B. To avoid making a forward reference to a (setf xxx) generic function:
 (defun setf-slot-value-using-class (new-value class object slot-name)
-    ;;(print (list 'forward-using slot-name))
-    ;;(#j:console:log "forward-using" new-value class object slot-name)
     (setf (slot-value-using-class class object slot-name) new-value))
 
+
+
+
+;;; slot-exists-p-using-class
 (defgeneric slot-exists-p-using-class (class instance slot-name))
 (defmethod slot-exists-p-using-class
     ((class standard-class) instance slot-name)
     (std-slot-exists-p instance slot-name))
 
+;;; slot-boundp-using-class
 (defgeneric slot-boundp-using-class (class instance slot-name))
 (defmethod slot-boundp-using-class
     ((class standard-class) instance slot-name)
     (std-slot-boundp instance slot-name))
 
+;;; slot-makunbound-using-class
 (defgeneric slot-makunbound-using-class (class instance slot-name))
 (defmethod slot-makunbound-using-class
     ((class standard-class) instance slot-name)
     (std-slot-makunbound instance slot-name))
 
 ;;; Instance creation and initialization
-
 (defgeneric allocate-instance (class))
 
 (defmethod allocate-instance ((class standard-class))
     (std-allocate-instance class))
 
+;;; make-instance
 (defgeneric make-instance (class &key))
 
 (defmethod make-instance ((class standard-class) &rest initargs)
@@ -59,16 +66,19 @@
 (defmethod make-instance ((class symbol) &rest initargs)
     (apply #'make-instance (find-class class) initargs))
 
+;;; initialize-instance
 (defgeneric initialize-instance (instance &key))
 
 (defmethod initialize-instance ((instance standard-object) &rest initargs)
     (apply #'shared-initialize instance t initargs))
 
+;;; reinitialize-instance
 (defgeneric reinitialize-instance (instance &key))
 (defmethod reinitialize-instance
     ((instance standard-object) &rest initargs)
     (apply #'shared-initialize instance () initargs))
 
+;;; shared-initialize
 (defgeneric shared-initialize (instance slot-names &key))
 (defmethod shared-initialize ((instance standard-object)
                               slot-names &rest all-keys)
@@ -89,7 +99,6 @@
     instance)
 
 ;;; change-class
-
 (defgeneric change-class (instance new-class &key))
 (defmethod change-class
     ((old-instance standard-object)
@@ -124,10 +133,9 @@
                                (class-slots (class-of new))))))
         (apply #'shared-initialize new added-slots initargs)))
 
-;;;
+;;;  todo:
 ;;;  Methods having to do with class metaobjects.
 ;;;
-
 (defmethod print-object ((class standard-class) stream)
     (print-unreadable-object (class stream :identity t)
         (format stream "~:(~S~) ~S"
@@ -139,20 +147,17 @@
     (apply #'std-after-initialization-for-classes class args))
 
 ;;; Finalize inheritance
-
 (defgeneric finalize-inheritance (class))
 (defmethod finalize-inheritance ((class standard-class))
     (std-finalize-inheritance class)
     (values))
 
 ;;; Class precedence lists
-
 (defgeneric compute-class-precedence-list (class))
 (defmethod compute-class-precedence-list ((class standard-class))
     (std-compute-class-precedence-list class))
 
 ;;; Slot inheritance
-
 (defgeneric compute-slots (class))
 (defmethod compute-slots ((class standard-class))
     (std-compute-slots class))
@@ -162,10 +167,10 @@
     ((class standard-class) direct-slots)
     (std-compute-effective-slot-definition class direct-slots))
 
+;;; todo:
 ;;;
 ;;; Methods having to do with generic function metaobjects.
 ;;;
-
 (defmethod print-object ((gf standard-generic-function) stream)
     (print-unreadable-object (gf stream :identity t)
         (format stream "~:(~S~) ~S"
@@ -176,10 +181,10 @@
 (defmethod initialize-instance :after ((gf standard-generic-function) &key)
     (finalize-generic-function gf))
 
+;;; todo:
 ;;;
 ;;; Methods having to do with method metaobjects.
 ;;;
-
 (defmethod print-object ((method standard-method) stream)
     (print-unreadable-object (method stream :identity t)
         (format stream "~:(~S~) ~S~{ ~S~} ~S"
@@ -216,8 +221,8 @@
 (defmethod compute-method-function ((method standard-method))
     (std-compute-method-function method))
 
+;;;
 ;;; describe-object is a handy tool for enquiring minds:
-
 (defgeneric describe-object (object stream))
 (defmethod describe-object ((object standard-object) stream)
     (format t "A Closette object~
