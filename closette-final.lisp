@@ -245,7 +245,7 @@
     (values))
 
 
-(format t "~%Closette is a Knights of the Lambda Calculus production.")
+;;;(format t "~%Closette is a Knights of the Lambda Calculus production.")
 
 (in-package :cl-user)
 
