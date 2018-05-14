@@ -181,9 +181,10 @@
 (defmethod initialize-instance :after ((gf standard-generic-function) &key)
     (finalize-generic-function gf))
 
-;;; todo:
+;;; todo: format
 ;;;
 ;;; Methods having to do with method metaobjects.
+;;;
 ;;;
 (defmethod print-object ((method standard-method) stream)
     (print-unreadable-object (method stream :identity t)
