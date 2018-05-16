@@ -2,7 +2,47 @@
 ;;; Utilities
 ;;;
 
+
+(in-package :cl-user)
+
+(defmacro setf* (var &rest expr)
+    `(progn
+         (if (setf ,var ,@expr) t nil)))
+
+;;; (safe (find-class ...))
+;;;
+(defmacro safe (&rest body) `(prog1 t ,@body))
+
+
+
+
+
 (in-package :closette)
+
+
+(defmacro print-unreadable-object((object stream &key type identity) &body body)
+    `(let ((.stream. ,stream)
+           (.object. ,object))
+         (format .stream. "#<")
+         ,(when type
+              '(format .stream. "~S" (type-of .object.)))
+         ,(when (and type (or body identity))
+              '(format .stream. " "))
+         ,@body
+         ,(when (and identity body)
+              '(format .stream. " "))
+         (format .stream. ">")
+         nil))
+
+;;;
+(defun get-properties (plist indicator-list)
+    (do ((it  plist (cddr it)))
+        ((null it)
+         (values nil nil nil))
+        (when (member (car it) indicator-list)
+            (return (values (first it) (second it) it)))))
+
+
 
 ;;; push-on-end is like push except it uses the other end:
 
@@ -11,8 +51,7 @@
 
 ;;; (setf getf*) is like (setf getf) except that it always changes the list,
 ;;;              which must be non-nil.
-
-;;; mvk defsetf getf*
+;;; defsetf getf*
 (defun setf-getf* (plist key new-value)
     (block body
         (do ((x plist (cddr x)))
@@ -27,7 +66,6 @@
 (defsetf getf* setf-getf*)
 
 ;;; mapappend is like mapcar except that the results are appended together:
-
 (defun mapappend (fun &rest args)
     (if (some #'null args)
         ()
@@ -35,7 +73,6 @@
                 (apply #'mapappend fun (mapcar #'cdr args)))))
 
 ;;; mapplist is mapcar for property lists:
-
 (defun mapplist (fun x)
     (if (null x)
         ()
@@ -43,7 +80,7 @@
               (mapplist fun (cddr x)))))
 
 
-;;; mvk set-difference
+;;; set-difference
 (defun set-difference (list-1 list-2 &key key (test #'equal))
     (cond (list-2
            (let ((result '()))
@@ -54,7 +91,7 @@
           (t
            list-1)))
 
-;;; mvk union
+;;; union
 (defun union (list-1 list-2 &key key (test #'equal))
     (cond ((and list-1 list-2)
            (let ((result list-2))
@@ -67,7 +104,7 @@
 
 
 
-;;;
+;;; intersection
 (defun intersection (list-1 list-2 &key key (test #'eql))
     (let ((result '()))
         (dolist (e list-1)
@@ -75,18 +112,8 @@
                 (push e result)))
         result))
 
-;;; sort
-;;;    = -> 0
-;;;    <    1
-;;;    >    -1
-(defun jsort (lst fn &optional aa bb cc)
-    (let ((jar (jscl::list-to-vector lst)))
-        ((jscl::oget jar "sort") fn)
-        (jscl::vector-to-list jar)))
 
-
-
-;;; remove-duplicates
+;;; remove-duplicates bug:
 (defun remove-duplicates (sequence &key from-end (test 'eql) test-not (key 'identity) (start 0) end)
     (when (or (not (eql start 0))
               end)
