@@ -5,6 +5,12 @@ Modified from original for JSCL.
 
 Compilation and running was done in Moren environment. 
 
+
+## Status
+
+beta version under devepolment
+
+
 ## Test generic
 
 ```lisp
