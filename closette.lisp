@@ -458,10 +458,9 @@
 
 #+nil (defsetf find-class setf-find-class)
 
-#+nil (defun forget-all-classes ()
-          (setf *class-table* (make-hash-table :test #'eq))
-          (values))
-
+(defun forget-all-classes ()
+    (setf *class-table* (make-hash-table :test #'eq))
+    (values))
 
 (defun* (setf find-class) (symbol new-value)
     (setf (gethash symbol *class-table*) new-value))
@@ -799,50 +798,77 @@
 ;;; generic-function-name
 (defun generic-function-name (gf)
     (slot-value gf 'name))
+#|
 (defun setf-generic-function-name (gf new-value)
     (setf (slot-value gf 'name) new-value))
 (defsetf generic-function-name setf-generic-function-name)
+|#
+
+(defun* (setf generic-function-name) (gf new-value)
+    (setf (slot-value gf 'name) new-value))
+
 
 
 
 ;;; generic-function-lambda-list
 (defun generic-function-lambda-list (gf)
     (slot-value gf 'lambda-list))
-(defun setf-generic-function-lambda-list (gf new-value)
+
+#+nil (defun setf-generic-function-lambda-list (gf new-value)
+          (setf (slot-value gf 'lambda-list) new-value))
+#+nil (defsetf generic-function-lambda-list setf-generic-function-lambda-list)
+
+(defun* (setf generic-function-lambda-list) (gf new-value)
     (setf (slot-value gf 'lambda-list) new-value))
-(defsetf generic-function-lambda-list setf-generic-function-lambda-list)
 
 
 
 ;;; generic-function-methods
 (defun generic-function-methods (gf)
     (slot-value gf 'methods))
-(defun setf-generic-function-methods (gf new-value)
+#+nil (defun setf-generic-function-methods (gf new-value)
+          (setf (slot-value gf 'methods) new-value))
+#+nil (defsetf generic-function-methods setf-generic-function-methods)
+
+(defun* (setf generic-function-methods) (gf new-value)
     (setf (slot-value gf 'methods) new-value))
-(defsetf generic-function-methods setf-generic-function-methods)
+
 
 
 ;;; generic-function-discriminating-function
 (defun generic-function-discriminating-function (gf)
     (slot-value gf 'discriminating-function))
-(defun setf-generic-function-discriminating-function (gf new-value)
+#+nil (defun setf-generic-function-discriminating-function (gf new-value)
+          (setf (slot-value gf 'discriminating-function) new-value))
+#+nil (defsetf generic-function-discriminating-function setf-generic-function-discriminating-function)
+
+(defun* (setf generic-function-discriminating-function) (gf new-value)
     (setf (slot-value gf 'discriminating-function) new-value))
-(defsetf generic-function-discriminating-function setf-generic-function-discriminating-function)
+
 
 ;;; generic-function-method-class
 (defun generic-function-method-class (gf)
     (slot-value gf 'method-class))
-(defun setf-generic-function-method-class (gf new-value)
+#+nil (defun setf-generic-function-method-class (gf new-value)
+          (setf (slot-value gf 'method-class) new-value))
+#+nil (defsetf generic-function-method-class setf-generic-function-method-class)
+
+(defun* (setf generic-function-method-class) (gf new-value)
     (setf (slot-value gf 'method-class) new-value))
-(defsetf generic-function-method-class setf-generic-function-method-class)
+
+
 
 ;;; Internal accessor for effective method function table
 
 (defun classes-to-emf-table (gf)
     (slot-value gf 'classes-to-emf-table))
-(defun setf-classes-to-emf-table (gf new-value)
+#+nil (defun setf-classes-to-emf-table (gf new-value)
+          (setf (slot-value gf 'classes-to-emf-table) new-value))
+#+nil (defsetf classes-to-emf-table setf-classes-to-emf-table)
+
+(defun* (setf classes-to-emf-table) (gf new-value)
     (setf (slot-value gf 'classes-to-emf-table) new-value))
-(defsetf classes-to-emf-table setf-classes-to-emf-table)
+
 
 
 ;;;
