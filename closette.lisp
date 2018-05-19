@@ -895,7 +895,7 @@
 
 ;;; ensure-generic-function
 (defun ensure-generic-function (function-name &rest all-keys)
-    (print (list 'fn function-name 'keys all-keys))
+    ;;(print (list 'fn function-name 'keys all-keys))
     (if (find-generic-function function-name nil)
         (find-generic-function function-name)
         (let*
