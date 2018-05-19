@@ -70,8 +70,7 @@
     (apply #'shared-initialize instance () initargs))
 
 (defgeneric shared-initialize (instance slot-names &key))
-(defmethod shared-initialize ((instance standard-object)
-                              slot-names &rest all-keys)
+(defmethod shared-initialize ((instance standard-object) slot-names &rest all-keys)
     (dolist (slot (class-slots (class-of instance)))
         (let ((slot-name (slot-definition-name slot)))
             (multiple-value-bind (init-key init-value foundp)
