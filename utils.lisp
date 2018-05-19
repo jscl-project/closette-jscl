@@ -145,7 +145,7 @@
     (cond (list2
            (let ((result '()))
                (dolist (it list1)
-                   (when (not (member e list2 :key key :test test))
+                   (when (not (member it list2 :key key :test test))
                        (push it result)))
                result))
           (t list1)))
