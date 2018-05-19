@@ -1011,8 +1011,6 @@
 (defun* (setf find-generic-function) (symbol new-value)
     (setf (gethash symbol *generic-function-table*) new-value))
 
-
-
 (defun forget-all-generic-functions ()
     (setq *generic-function-table* (make-hash-table :test #'eq))
     (values))
@@ -1054,10 +1052,6 @@
     (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
     (values))
 
-
-
-
-
 ;;; make-instance-standard-generic-function creates and initializes an
 ;;; instance of standard-generic-function without falling into method lookup.
 ;;; However, it cannot be called until standard-generic-function exists.
@@ -1081,7 +1075,6 @@
 
 
 ;;; defmethod
-
 (defmacro defmethod (&rest args)
     (multiple-value-bind (function-name qualifiers lambda-list specializers body)
         (parse-defmethod args)
@@ -1127,7 +1120,6 @@
                        body))))
 
 ;;; Several tedious functions for analyzing lambda lists
-
 (defun required-portion (gf args)
     (let ((number-required (length (gf-required-arglist gf))))
         (when (< (length args) number-required)
@@ -1233,7 +1225,6 @@
 ;;; make-instance-standard-method creates and initializes an instance of
 ;;; standard-method without falling into method lookup.  However, it cannot
 ;;; be called until standard-method exists.
-
 (defun make-instance-standard-method (method-class
                                       &key lambda-list qualifiers
                                         specializers body environment)
@@ -1250,11 +1241,9 @@
         method))
 
 ;;; add-method
-
 ;;; N.B. This version first removes any existing method on the generic function
 ;;; with the same qualifiers and specializers.  It's a pain to develop
 ;;; programs without this feature of full CLOS.
-
 (defun add-method (gf method)
     (let ((old-method
             (find-method gf (method-qualifiers method)
@@ -1290,7 +1279,6 @@
             method)))
 
 ;;; Reader and write methods
-
 (defun add-reader-method (class fn-name slot-name)
     (ensure-method
      (ensure-generic-function fn-name :lambda-list '(object))
@@ -1320,13 +1308,11 @@
 ;;;
 
 ;;; apply-generic-function ???
-
 (defun apply-generic-function (gf args)
     ;;(#j:console:log "apply-generic-fn" (format nil "~a" args))
     (apply (generic-function-discriminating-function gf) args))
 
 ;;; compute-discriminating-function
-
 (defun std-compute-discriminating-function (gf)
     #'(lambda (&rest args)
           (let* ((classes (mapcar #'class-of
@@ -1379,7 +1365,6 @@
     nil)
 
 ;;; apply-methods and compute-effective-method-function
-
 (defun apply-methods (gf args methods)
     (funcall (compute-effective-method-function gf methods)
              args))
@@ -1462,7 +1447,6 @@
 ;;; N.B. The function kludge-arglist is used to pave over the differences
 ;;; between argument keyword compatibility for regular functions versus
 ;;; generic functions.
-
 (defun kludge-arglist (lambda-list)
     (if (and (member '&key lambda-list)
              (not (member '&allow-other-keys lambda-list)))
