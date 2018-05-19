@@ -163,13 +163,23 @@
         (std-slot-value object slot-name)
         (slot-value-using-class (class-of object) object slot-name)))
 
+#|
 (defun setf-slot-value (object slot-name new-value)
     (if (eq (class-of (class-of object)) the-class-standard-class)
         (setf (std-slot-value object slot-name) new-value)
         (setf-slot-value-using-class
          new-value (class-of object) object slot-name)))
 
+
 (defsetf slot-value setf-slot-value)
+|#
+
+(defun* (setf slot-value) (object slot-name new-value)
+    (if (eq (class-of (class-of object)) the-class-standard-class)
+        (setf (std-slot-value object slot-name) new-value)
+        (setf-slot-value-using-class
+         new-value (class-of object) object slot-name)))
+
 
 ;;; std-slot-boundp
 (defun std-slot-boundp (instance slot-name)
@@ -271,55 +281,85 @@
 
 ;;; class-name
 (defun class-name (class) (std-slot-value class 'name))
+
+#|
 (defun setf-class-name (class new-value)
     (setf (slot-value class 'name) new-value))
 (defsetf class-name setf-class-name)
+|#
+
+(defun* (setf class-name) (class new-value)
+    (setf (slot-value class 'name) new-value))
+
+
 
 ;;; class-direct-superclasses
 (defun class-direct-superclasses (class)
     (slot-value class 'direct-superclasses))
-(defun setf-class-direct-superclasses (class new-value)
+#+nil (defun setf-class-direct-superclasses (class new-value)
+          (setf (slot-value class 'direct-superclasses) new-value))
+#+nil (defsetf class-direct-superclasses setf-class-direct-superclasses)
+
+(defun* (setf class-direct-superclasses) (class new-value)
     (setf (slot-value class 'direct-superclasses) new-value))
-(defsetf class-direct-superclasses setf-class-direct-superclasses)
 
 
 ;;; class-direct-slots
 (defun class-direct-slots (class)
     (slot-value class 'direct-slots))
-(defun setf-class-direct-slots (class new-value)
+#+nil (defun setf-class-direct-slots (class new-value)
+          (setf (slot-value class 'direct-slots) new-value))
+#+nil (defsetf class-direct-slots setf-class-direct-slots)
+
+(defun* (setf class-direct-slots) (class new-value)
     (setf (slot-value class 'direct-slots) new-value))
-(defsetf class-direct-slots setf-class-direct-slots)
 
 
 ;;; class-precedence-list
 (defun class-precedence-list (class)
     (slot-value class 'class-precedence-list))
-(defun setf-class-precedence-list (class new-value)
+#+nil (defun setf-class-precedence-list (class new-value)
+          (setf (slot-value class 'class-precedence-list) new-value))
+#+nil (defsetf class-precedence-list setf-class-precedence-list)
+
+(defun* (setf class-precedence-list) (class new-value)
     (setf (slot-value class 'class-precedence-list) new-value))
-(defsetf class-precedence-list setf-class-precedence-list)
+
 
 
 ;;; class-slots
 (defun class-slots (class)
     (slot-value class 'effective-slots))
-(defun setf-class-slots (class new-value)
+#+nil (defun setf-class-slots (class new-value)
+          (setf (slot-value class 'effective-slots) new-value))
+#+nil (defsetf class-slots setf-class-slots)
+
+(defun* (setf class-slots) (class new-value)
     (setf (slot-value class 'effective-slots) new-value))
-(defsetf class-slots setf-class-slots)
 
 
 ;;; class-direct-subclasses
 (defun class-direct-subclasses (class)
     (slot-value class 'direct-subclasses))
-(defun setf-class-direct-subclasses (class new-value)
+#+nil (defun setf-class-direct-subclasses (class new-value)
+          (setf (slot-value class 'direct-subclasses) new-value))
+#+nil (defsetf class-direct-subclasses setf-class-direct-subclasses)
+
+(defun* (setf class-direct-subclasses) (class new-value)
     (setf (slot-value class 'direct-subclasses) new-value))
-(defsetf class-direct-subclasses setf-class-direct-subclasses)
+
+
 
 ;;; class-direct-methods
 (defun class-direct-methods (class)
     (slot-value class 'direct-methods))
-(defun setf-class-direct-methods (class new-value)
+#+nil (defun setf-class-direct-methods (class new-value)
+          (setf (slot-value class 'direct-methods) new-value))
+#+nil (defsetf class-direct-methods setf-class-direct-methods)
+
+(defun* (setf class-direct-methods) (class new-value)
     (setf (slot-value class 'direct-methods) new-value))
-(defsetf class-direct-methods setf-class-direct-methods)
+
 
 
 ;;; defclass
@@ -416,11 +456,15 @@
 (defun setf-find-class (symbol new-value)
     (setf (gethash symbol *class-table*) new-value))
 
-(defsetf find-class setf-find-class)
+#+nil (defsetf find-class setf-find-class)
 
-(defun forget-all-classes ()
-    (setf *class-table* (make-hash-table :test #'eq))
-    (values))
+#+nil (defun forget-all-classes ()
+          (setf *class-table* (make-hash-table :test #'eq))
+          (values))
+
+
+(defun* (setf find-class) (symbol new-value)
+    (setf (gethash symbol *class-table*) new-value))
 
 
 ;;; Ensure class
@@ -519,63 +563,84 @@
         (setf (getf* slot ':allocation) allocation)
         slot))
 
-;;; :todo: inline getf*
 
 ;;; slot-definition-name
 (defun slot-definition-name (slot)
     (getf slot ':name))
-(defun setf-slot-definition-name (slot new-value)
+#+nil (defun setf-slot-definition-name (slot new-value)
+          (setf (getf* slot ':name) new-value))
+#+nil (defsetf slot-definition-name setf-slot-definition-name)
+
+(defun* (setf slot-definition-name) (slot new-value)
     (setf (getf* slot ':name) new-value))
-(defsetf slot-definition-name setf-slot-definition-name)
 
 
 ;;; slot-definition-initfunction
 (defun slot-definition-initfunction (slot)
     (getf slot ':initfunction))
-(defun setf-slot-definition-initfunction (slot new-value)
+#+nil (defun setf-slot-definition-initfunction (slot new-value)
+          (setf (getf* slot ':initfunction) new-value))
+#+nil (defsetf slot-definition-initfunction setf-slot-definition-initfunction)
+
+(defun* (setf slot-definition-initfunction) (slot new-value)
     (setf (getf* slot ':initfunction) new-value))
-(defsetf slot-definition-initfunction setf-slot-definition-initfunction)
+
+
 
 ;;; slot-definition-initform
 (defun slot-definition-initform (slot)
     (getf slot ':initform))
-(defun setf-slot-definition-initform (slot new-value)
-    (setf (getf* slot ':initform) new-value))
-(defsetf slot-definition-initform setf-slot-definition-initform)
+#+nil (defun setf-slot-definition-initform (slot new-value)
+          (setf (getf* slot ':initform) new-value))
+#+nil (defsetf slot-definition-initform setf-slot-definition-initform)
 
+(defun* (setf slot-definition-initform) (slot new-value)
+    (setf (getf* slot ':initform) new-value))
 
 
 ;;; slot-definition-initargs
 (defun slot-definition-initargs (slot)
     (getf slot ':initargs))
-(defun setf-slot-definition-initargs (slot new-value)
+#+nil (defun setf-slot-definition-initargs (slot new-value)
+          (setf (getf* slot ':initargs) new-value))
+#+nil (defsetf slot-definition-initargs setf-slot-definition-initargs)
+
+(defun* (setf slot-definition-initargs) (slot new-value)
     (setf (getf* slot ':initargs) new-value))
-(defsetf slot-definition-initargs setf-slot-definition-initargs)
 
 
 ;;; slot-definition-readers
 (defun slot-definition-readers (slot)
     (getf slot ':readers))
-(defun setf-slot-definition-readers (slot new-value)
-    (setf (getf* slot ':readers) new-value))
-(defsetf slot-definition-readers setf-slot-definition-readers)
+#+nil (defun setf-slot-definition-readers (slot new-value)
+          (setf (getf* slot ':readers) new-value))
+#+nil (defsetf slot-definition-readers setf-slot-definition-readers)
 
+(defun* (setf slot-definition-readers) (slot new-value)
+    (setf (getf* slot ':readers) new-value))
 
 
 ;;; slot-definition-writers
 (defun slot-definition-writers (slot)
     (getf slot ':writers))
-(defun setf-slot-definition-writers (slot new-value)
+#+nil (defun setf-slot-definition-writers (slot new-value)
+          (setf (getf* slot ':writers) new-value))
+#+nil (defsetf slot-definition-writers setf-slot-definition-writers)
+
+(defun* (setf slot-definition-writers) (slot new-value)
     (setf (getf* slot ':writers) new-value))
-(defsetf slot-definition-writers setf-slot-definition-writers)
+
 
 
 ;;; slot-definition-allocation
 (defun slot-definition-allocation (slot)
     (getf slot ':allocation))
-(defun setf-slot-definition-allocation (slot new-value)
+#+nil (defun setf-slot-definition-allocation (slot new-value)
+          (setf (getf* slot ':allocation) new-value))
+#+nil (defsetf slot-definition-allocation setf-slot-definition-allocation)
+
+(defun* (setf slot-definition-allocation) (slot new-value)
     (setf (getf* slot ':allocation) new-value))
-(defsetf slot-definition-allocation setf-slot-definition-allocation)
 
 
 ;;; finalize-inheritance
