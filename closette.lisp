@@ -1386,7 +1386,7 @@
     (let ((primaries (remove-if-not #'primary-method-p methods))
           (around (find-if #'around-method-p methods)))
         (when (null primaries)
-            ;; its bug!!!
+            ;; bug: its bug!!!
             (error "No primary methods for the generic function ~S." gf))
         (if around
             (let ((next-emfun
