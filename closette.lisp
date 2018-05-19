@@ -878,6 +878,7 @@
 
 ;;; ensure-generic-function
 (defun ensure-generic-function (function-name &rest all-keys)
+    (print (list 'fn function-name 'keys all-keys))
     (if (find-generic-function function-name nil)
         (find-generic-function function-name)
         (let*
@@ -905,6 +906,7 @@
                        #'std-compute-discriminating-function
                        #'compute-discriminating-function)
                    gf))
+    ;;(print (list 'finalize-generic (generic-function-name gf)))
     (jscl::fset (generic-function-name gf)
                 (generic-function-discriminating-function gf))
     (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
@@ -924,6 +926,9 @@
           (lambda-list (get-keyword-from all-keys :lambda-list))
           (method-class (get-keyword-from all-keys :method-class))
           (gf (std-allocate-instance the-class-standard-gf)))
+        ;;(print all-keys)
+        ;;(print lambda-list)
+        ;;(print name)
         (setf (generic-function-name gf) name)
         (setf (generic-function-lambda-list gf) lambda-list)
         (setf (generic-function-methods gf) ())
@@ -1335,6 +1340,7 @@
 ;;; see above
 (defun compile-in-lexical-environment (env lambda-expr)
     (declare (ignore env))
+    ;;(print lambda-expr)
     (if compile-methods
         (compile nil lambda-expr)
         (eval `(function ,lambda-expr))))
