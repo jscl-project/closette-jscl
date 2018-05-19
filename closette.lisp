@@ -113,13 +113,22 @@
                         pos))))))
 
 ;;; slot-contents
+
+
 (defun slot-contents (slots location)
     (aref slots location))
 
+#|
 (defun setf-slot-contents (slots location new-value)
     (setf (aref slots location) new-value))
 
 (defsetf slot-contents setf-slot-contents)
+|#
+
+(defun* (setf slot-contents) (slots location new-value)
+    (setf (aref slots location) new-value))
+
+
 
 
 ;;; std-slot-value
@@ -131,13 +140,21 @@
             (error "The slot ~S is unbound in the object ~S."
                    slot-name instance)
             val)))
-
+#|
 (defun setf-std-slot-value (instance slot-name new-value)
     (let ((location (slot-location (class-of instance) slot-name))
           (slots (std-instance-slots instance)))
         (setf (slot-contents slots location) new-value)))
 
 (defsetf std-slot-value setf-std-slot-value)
+|#
+
+
+(defun* (setf std-slot-value) (instance slot-name new-value)
+    (let ((location (slot-location (class-of instance) slot-name))
+          (slots (std-instance-slots instance)))
+        (setf (slot-contents slots location) new-value)))
+
 
 ;;; slot-value
 
