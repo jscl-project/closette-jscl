@@ -1003,9 +1003,15 @@
         (if (and (null gf) errorp)
             (error "No generic function named ~S." symbol)
             gf)))
-(defun setf-find-generic-function (symbol new-value)
+
+#+nil (defun setf-find-generic-function (symbol new-value)
+          (setf (gethash symbol *generic-function-table*) new-value))
+#+nil (defsetf find-generic-function setf-find-generic-function)
+
+(defun* (setf find-generic-function) (symbol new-value)
     (setf (gethash symbol *generic-function-table*) new-value))
-(defsetf find-generic-function setf-find-generic-function)
+
+
 
 (defun forget-all-generic-functions ()
     (setq *generic-function-table* (make-hash-table :test #'eq))
