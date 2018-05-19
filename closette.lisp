@@ -890,51 +890,79 @@
 
 ;;; method-lambda-list
 (defun method-lambda-list (method) (slot-value method 'lambda-list))
-(defun setf-method-lambda-list (method new-value)
+#+nil (defun setf-method-lambda-list (method new-value)
+          (setf (slot-value method 'lambda-list) new-value))
+#+nil (defsetf method-lambda-list setf-method-lambda-list)
+
+(defun* (setf method-lambda-list) (method new-value)
     (setf (slot-value method 'lambda-list) new-value))
-(defsetf method-lambda-list setf-method-lambda-list)
+
+
 
 
 ;;; method-qualifiers
 (defun method-qualifiers (method) (slot-value method 'qualifiers))
-(defun setf-method-qualifiers (method new-value)
+#+nil (defun setf-method-qualifiers (method new-value)
+          (setf (slot-value method 'qualifiers) new-value))
+#+nil (defsetf method-qualifiers setf-method-qualifiers)
+
+(defun* (setf method-qualifiers) (method new-value)
     (setf (slot-value method 'qualifiers) new-value))
-(defsetf method-qualifiers setf-method-qualifiers)
 
 
 ;;; method-specializers
 (defun method-specializers (method) (slot-value method 'specializers))
-(defun setf-method-specializers (method new-value)
+#+nil (defun setf-method-specializers (method new-value)
+          (setf (slot-value method 'specializers) new-value))
+#+nil (defsetf method-specializers setf-method-specializers)
+
+(defun* (setf method-specializers) (method new-value)
     (setf (slot-value method 'specializers) new-value))
-(defsetf method-specializers setf-method-specializers)
 
 
 
 ;;; method-body
 (defun method-body (method) (slot-value method 'body))
-(defun setf-method-body (method new-value)
+#+nil (defun setf-method-body (method new-value)
+          (setf (slot-value method 'body) new-value))
+#+nil (defsetf method-body setf-method-body)
+
+(defun* (setf method-body) (method new-value)
     (setf (slot-value method 'body) new-value))
-(defsetf method-body setf-method-body)
+
+
+
 
 ;;; method-environment
 (defun method-environment (method) (slot-value method 'environment))
-(defun setf-method-environment (method new-value)
+#+nil (defun setf-method-environment (method new-value)
+          (setf (slot-value method 'environment) new-value))
+#+nil (defsetf method-environment setf-method-environment)
+
+(defun* (setf method-environment) (method new-value)
     (setf (slot-value method 'environment) new-value))
-(defsetf method-environment setf-method-environment)
+
 
 ;;; method-generic-function
 (defun method-generic-function (method)
     (slot-value method 'generic-function))
-(defun setf-method-generic-function (method new-value)
+#+nil (defun setf-method-generic-function (method new-value)
+          (setf (slot-value method 'generic-function) new-value))
+#+nil (defsetf method-generic-function setf-method-generic-function)
+
+(defun* (setf method-generic-function) (method new-value)
     (setf (slot-value method 'generic-function) new-value))
-(defsetf method-generic-function setf-method-generic-function)
+
 
 
 ;;; method-function
 (defun method-function (method) (slot-value method 'function))
-(defun setf-method-function (method new-value)
+#+nil (defun setf-method-function (method new-value)
+          (setf (slot-value method 'function) new-value))
+#+nil (defsetf method-function setf-method-function)
+
+(defun* (setf method-function) (method new-value)
     (setf (slot-value method 'function) new-value))
-(defsetf method-function setf-method-function)
 
 
 
