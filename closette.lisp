@@ -1291,6 +1291,8 @@
 
 (defun add-writer-method (class fn-name slot-name)
     ;;(#j:console:log "add-writer-method" (class-name class) fn-name slot-name)
+    ;;(print (list 'add-write 'type (type-of fn-name)))
+    ;; => cons
     (ensure-method
      (ensure-generic-function fn-name :lambda-list '(object new-value))
      :lambda-list '(object new-value)
