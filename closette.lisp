@@ -93,8 +93,8 @@
 (defvar the-class-standard-class)    ;standard-class's class metaobject
 
 (defun slot-location (class slot-name)
-    (if (and (equal slot-name 'effective-slots)
-             (equal class the-class-standard-class))
+    (if (and (eq slot-name 'effective-slots)
+             (eq class the-class-standard-class))
         (position 'effective-slots the-slots-of-standard-class
                   :key #'slot-definition-name)
         (let ((slot (find slot-name
@@ -142,12 +142,12 @@
 ;;; slot-value
 
 (defun slot-value (object slot-name)
-    (if (equal (class-of (class-of object)) the-class-standard-class)
+    (if (eq (class-of (class-of object)) the-class-standard-class)
         (std-slot-value object slot-name)
         (slot-value-using-class (class-of object) object slot-name)))
 
 (defun setf-slot-value (object slot-name new-value)
-    (if (equal (class-of (class-of object)) the-class-standard-class)
+    (if (eq (class-of (class-of object)) the-class-standard-class)
         (setf (std-slot-value object slot-name) new-value)
         (setf-slot-value-using-class
          new-value (class-of object) object slot-name)))
@@ -161,7 +161,7 @@
         (not (equal secret-unbound-value (slot-contents slots location)))))
 
 (defun slot-boundp (object slot-name)
-    (if (equal (class-of (class-of object)) the-class-standard-class)
+    (if (eq (class-of (class-of object)) the-class-standard-class)
         (std-slot-boundp object slot-name)
         (slot-boundp-using-class (class-of object) object slot-name)))
 
@@ -173,7 +173,7 @@
     instance)
 
 (defun slot-makunbound (object slot-name)
-    (if (equal (class-of (class-of object)) the-class-standard-class)
+    (if (eq (class-of (class-of object)) the-class-standard-class)
         (std-slot-makunbound object slot-name)
         (slot-makunbound-using-class (class-of object) object slot-name)))
 
@@ -183,7 +183,7 @@
                      :key #'slot-definition-name))))
 
 (defun slot-exists-p (object slot-name)
-    (if (equal (class-of (class-of object)) the-class-standard-class)
+    (if (eq (class-of (class-of object)) the-class-standard-class)
         (std-slot-exists-p object slot-name)
         (slot-exists-p-using-class (class-of object) object slot-name)))
 
@@ -388,7 +388,7 @@
 
 ;;; find-class
 
-(defparameter *class-table* (make-hash-table :test #'equal))
+(defparameter *class-table* (make-hash-table :test #'eq))
 
 (defun find-class (symbol &optional (errorp t))
     (let ((class (gethash symbol *class-table* nil)))
@@ -402,7 +402,7 @@
 (defsetf find-class setf-find-class)
 
 (defun forget-all-classes ()
-    (setf *class-table* (make-hash-table :test #'equal))
+    (setf *class-table* (make-hash-table :test #'eq))
     (values))
 
 
@@ -418,7 +418,7 @@
     (if (find-class name nil)
         (error "Can't redefine the class named ~S." name)
         (let* ((metaclass (get-keyword-from all-keys :metaclass the-class-standard-class))
-               (class (apply (if (equal metaclass the-class-standard-class)
+               (class (apply (if (eq metaclass the-class-standard-class)
                                  'make-instance-standard-class
                                  'make-instance)
                              metaclass :name name all-keys)))
@@ -463,7 +463,7 @@
             (dolist (writer (slot-definition-writers direct-slot))
                 (add-writer-method
                  class writer (slot-definition-name direct-slot)))))
-    (funcall (if (equal (class-of class) the-class-standard-class)
+    (funcall (if (eq (class-of class) the-class-standard-class)
                  #'std-finalize-inheritance
                  #'finalize-inheritance)
              class)
@@ -564,12 +564,12 @@
 ;;; finalize-inheritance
 (defun std-finalize-inheritance (class)
     (setf (class-precedence-list class)
-          (funcall (if (equal (class-of class) the-class-standard-class)
+          (funcall (if (eq (class-of class) the-class-standard-class)
                        #'std-compute-class-precedence-list
                        #'compute-class-precedence-list)
                    class))
     (setf (class-slots class)
-          (funcall (if (equal (class-of class) the-class-standard-class)
+          (funcall (if (eq (class-of class) the-class-standard-class)
                        #'std-compute-slots
                        #'compute-slots)
                    class))
@@ -669,7 +669,7 @@
                        (mapcar #'slot-definition-name all-slots))))
         (mapcar #'(lambda (name)
                       (funcall
-                       (if (equal (class-of class) the-class-standard-class)
+                       (if (eq (class-of class) the-class-standard-class)
                            #'std-compute-effective-slot-definition
                            #'compute-effective-slot-definition)
                        class
@@ -710,7 +710,7 @@
      (discriminating-function)  ; :accessor generic-function-
                                         ;    -discriminating-function
      (classes-to-emf-table      ; :accessor classes-to-emf-table
-      :initform (make-hash-table :test #'equal)))))
+      :initform (make-hash-table :test #'eq)))))
 
 (defvar the-class-standard-gf) ;standard-generic-function's class metaobject
 
@@ -860,7 +860,7 @@
 ;;; artifact of the fact that our generic function metaobjects can't legally
 ;;; be stored a symbol's function value.
 
-(defparameter *generic-function-table* (make-hash-table :test #'equal))
+(defparameter *generic-function-table* (make-hash-table :test #'eq))
 
 (defun find-generic-function (symbol &optional (errorp t))
     (let ((gf (gethash symbol *generic-function-table* nil)))
@@ -872,7 +872,7 @@
 (defsetf find-generic-function setf-find-generic-function)
 
 (defun forget-all-generic-functions ()
-    (setq *generic-function-table* (make-hash-table :test #'equal))
+    (setq *generic-function-table* (make-hash-table :test #'eq))
     (values))
 
 
@@ -883,7 +883,7 @@
         (let*
             ((generic-function-class (get-keyword-from all-keys :generic-function-class the-class-standard-gf))
              (method-class (get-keyword-from all-keys :method-class the-class-standard-method))
-             (gf (apply (if (equal generic-function-class the-class-standard-gf)
+             (gf (apply (if (eq generic-function-class the-class-standard-gf)
                             #'make-instance-standard-generic-function
                             #'make-instance)
                         generic-function-class
@@ -901,13 +901,13 @@
 
 (defun finalize-generic-function (gf)
     (setf (generic-function-discriminating-function gf)
-          (funcall (if (equal (class-of gf) the-class-standard-gf)
+          (funcall (if (eq (class-of gf) the-class-standard-gf)
                        #'std-compute-discriminating-function
                        #'compute-discriminating-function)
                    gf))
     (jscl::fset (generic-function-name gf)
                 (generic-function-discriminating-function gf))
-    (setf (classes-to-emf-table gf) (make-hash-table :test #'equal))
+    (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
     (values))
 
 
@@ -1075,7 +1075,7 @@
 (defun ensure-method (gf &rest all-keys)
     (let ((new-method
             (apply
-             (if (equal (generic-function-method-class gf) the-class-standard-method)
+             (if (eq (generic-function-method-class gf) the-class-standard-method)
                  #'make-instance-standard-method
                  #'make-instance)
              (generic-function-method-class gf)
@@ -1133,10 +1133,10 @@
 (defun find-method (gf qualifiers specializers &optional (errorp t))
     (let ((method
             (find-if #'(lambda (method)
-                           (and (equal qualifiers
-                                       (method-qualifiers method))
-                                (equal specializers
-                                       (method-specializers method))))
+                           (and (eq qualifiers
+                                    (method-qualifiers method))
+                                (eq specializers
+                                    (method-specializers method))))
                      (generic-function-methods gf))))
         (if (and (null method) errorp)
             (error "No such method for ~S." (generic-function-name gf))
@@ -1155,7 +1155,7 @@
     (values))
 
 (defun add-writer-method (class fn-name slot-name)
-    (#j:console:log "add-writer-method" (class-name class) fn-name slot-name)
+    ;;(#j:console:log "add-writer-method" (class-name class) fn-name slot-name)
     (ensure-method
      (ensure-generic-function fn-name :lambda-list '(object new-value))
      :lambda-list '(object new-value)
@@ -1175,7 +1175,7 @@
 ;;; apply-generic-function ???
 
 (defun apply-generic-function (gf args)
-    (#j:console:log "apply-generic-fn" (format nil "~a" args))
+    ;;(#j:console:log "apply-generic-fn" (format nil "~a" args))
     (apply (generic-function-discriminating-function gf) args))
 
 ;;; compute-discriminating-function
@@ -1194,7 +1194,7 @@
              (compute-applicable-methods-using-classes gf classes))
            (emfun
              (funcall
-              (if (equal (class-of gf) the-class-standard-gf)
+              (if (eq (class-of gf) the-class-standard-gf)
                   #'std-compute-effective-method-function
                   #'compute-effective-method-function)
               gf applicable-methods)))
@@ -1214,7 +1214,7 @@
                      (generic-function-methods gf)))
      #'(lambda (m1 m2)
            (funcall
-            (if (equal (class-of gf) the-class-standard-gf)
+            (if (eq (class-of gf) the-class-standard-gf)
                 #'std-method-more-specific-p
                 #'method-more-specific-p)
             gf m1 m2 required-classes))))
@@ -1223,7 +1223,7 @@
 (defun std-method-more-specific-p (gf method1 method2 required-classes)
     (declare (ignore gf))
     (mapc #'(lambda (spec1 spec2 arg-class)
-                (unless (equal spec1 spec2)
+                (unless (eq spec1 spec2)
                     (return-from std-method-more-specific-p
                         (sub-specializer-p spec1 spec2 arg-class))))
           (method-specializers method1)
@@ -1259,7 +1259,7 @@
         (if around
             (let ((next-emfun
                     (funcall
-                     (if (equal (class-of gf) the-class-standard-gf)
+                     (if (eq (class-of gf) the-class-standard-gf)
                          #'std-compute-effective-method-function
                          #'compute-effective-method-function)
                      gf (remove around methods))))
