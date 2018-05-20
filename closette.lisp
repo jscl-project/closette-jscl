@@ -1282,6 +1282,8 @@
     method)
 
 (defun remove-method (gf method)
+    (let ((fn-name (generic-function-name gf)))
+        (print (list 'remove-method fn-name 'type (type-of fn-name))))
     (setf (generic-function-methods gf)
           (remove method (generic-function-methods gf)))
     (setf (method-generic-function method) nil)
@@ -1292,6 +1294,8 @@
     method)
 
 (defun find-method (gf qualifiers specializers &optional (errorp t))
+    (let ((fn-name (generic-function-name gf)))
+        (print (list 'find-method fn-name 'type (type-of fn-name))))
     (let ((method
             (find-if #'(lambda (method)
                            (and (eq qualifiers
