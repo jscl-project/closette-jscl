@@ -65,6 +65,7 @@
 ;;; Standard instance allocation
 
 (defparameter secret-unbound-value (list "slot unbound"))
+(defparameter *secret-unbound-value* (list "slot unbound"))
 
 (defun instance-slot-p (slot)
     (eql (slot-definition-allocation slot) ':instance))
@@ -91,6 +92,10 @@
 ;;; todo: to global vars
 (defvar the-slots-of-standard-class) ;standard-class's class-slots
 (defvar the-class-standard-class)    ;standard-class's class metaobject
+
+(defvar *the-slots-of-standard-class*) ;standard-class's class-slots
+(defvar *the-class-standard-class*)    ;standard-class's class metaobject
+
 
 (defun slot-location (class slot-name)
     (if (and (eq slot-name 'effective-slots)
@@ -796,7 +801,23 @@
      (classes-to-emf-table      ; :accessor classes-to-emf-table
       :initform (make-hash-table :test #'eq)))))
 
+(defparameter *the-defclass-standard-generic-function*
+  '(defclass standard-generic-function ()
+    ((name :initarg :name)      ; :accessor generic-function-name
+     (lambda-list               ; :accessor generic-function-lambda-list
+      :initarg :lambda-list)
+     (methods :initform ())     ; :accessor generic-function-methods
+     (method-class              ; :accessor generic-function-method-class
+      :initarg :method-class)
+     (discriminating-function)  ; :accessor generic-function-
+                                        ;    -discriminating-function
+     (classes-to-emf-table      ; :accessor classes-to-emf-table
+      :initform (make-hash-table :test #'eq)))))
+
+
 (defvar the-class-standard-gf) ;standard-generic-function's class metaobject
+(defvar *the-class-standard-gf*) ;standard-generic-function's class metaobject
+
 
 ;;; generic-function-name
 (defun generic-function-name (gf)
@@ -888,7 +909,20 @@
      (generic-function :initform nil)        ; :accessor method-generic-function
      (function))))                           ; :accessor method-function
 
+(defparameter *the-defclass-standard-method*
+  '(defclass standard-method ()
+    ((lambda-list :initarg :lambda-list)     ; :accessor method-lambda-list
+     (qualifiers :initarg :qualifiers)       ; :accessor method-qualifiers
+     (specializers :initarg :specializers)   ; :accessor method-specializers
+     (body :initarg :body)                   ; :accessor method-body
+     (environment :initarg :environment)     ; :accessor method-environment
+     (generic-function :initform nil)        ; :accessor method-generic-function
+     (function))))                           ; :accessor method-function
+
+
+
 (defvar the-class-standard-method)    ;standard-method's class metaobject
+(defvar *the-class-standard-method*)    ;standard-method's class metaobject
 
 
 ;;; method-lambda-list
@@ -1165,6 +1199,7 @@
         (getf plist ':specializers)))
 
 (defvar lambda-list-keywords '(&optional &rest &key &aux &allow-other-keys))
+(defvar *lambda-list-keywords* '(&optional &rest &key &aux &allow-other-keys))
 
 (defun analyze-lambda-list (lambda-list)
     (labels ((make-keyword (symbol)
@@ -1483,6 +1518,7 @@
 
 ;;; fuck he need?
 (defvar compile-methods nil)      ; by default, run everything interpreted
+(defvar *compile-methods* nil)      ; by default, run everything interpreted
 
 ;;; see above
 (defun compile-in-lexical-environment (env lambda-expr)
