@@ -267,8 +267,6 @@
 ;;; Class metaobjects and standard-class
 ;;;
 
-;;; todo: to global vars
-
 (defparameter *the-defclass-standard-class*  ;standard-class's defclass form
   '(defclass standard-class ()
     ((name :initarg :name)              ; :accessor class-name
