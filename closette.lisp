@@ -60,7 +60,6 @@
 
 ;;; Standard instance allocation
 
-#+nil (defparameter secret-unbound-value (list "slot unbound"))
 (defparameter *secret-unbound-value* (list "slot unbound"))
 
 (defun instance-slot-p (slot)
