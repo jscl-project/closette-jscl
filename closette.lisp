@@ -269,7 +269,7 @@
 
 ;;; todo: to global vars
 
-(defparameter the-defclass-standard-class  ;standard-class's defclass form
+(defparameter *the-defclass-standard-class*  ;standard-class's defclass form
   '(defclass standard-class ()
     ((name :initarg :name)              ; :accessor class-name
      (direct-superclasses               ; :accessor class-direct-superclasses

@@ -24,7 +24,7 @@
                      (let ((a (getf (cdr slotd) ':initform)))
                          (if a #'(lambda () (eval a)) nil))
                      :allocation ':instance))
-              (nth 3 the-defclass-standard-class)))
+              (nth 3 *the-defclass-standard-class*)))
 
 ;; 2. Create the standard-class metaobject by hand.
 (setf the-class-standard-class
@@ -59,7 +59,7 @@
 (defclass standard-object (t) ())
 
 ;; 7. Define the full-blown version of standard-class.
-(setf the-class-standard-class (eval the-defclass-standard-class))
+(setf the-class-standard-class (eval *the-defclass-standard-class*))
 
 ;; 8. Replace all (3) existing pointers to the skeleton with real one.
 ;; note: lambda !!!
