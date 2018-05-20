@@ -412,7 +412,10 @@
                   (:writer
                    (push-on-end (cadr olist) writers))
                   (:accessor
+                   ;; accessor reader fn
                    (push-on-end (cadr olist) readers)
+                   ;; accessor writer fn
+                   ;; make (setf name) symbolic name
                    (push-on-end `(setf ,(cadr olist)) writers))
                   (otherwise
                    (push-on-end `',(car olist) other-options)
@@ -1018,7 +1021,7 @@
 
 ;;; ensure-generic-function
 (defun ensure-generic-function (function-name &rest all-keys)
-    ;;(print (list 'fn function-name 'keys all-keys))
+    (print (list 'ensure-generic-function function-name ))
     (if (find-generic-function function-name nil)
         (find-generic-function function-name)
         (let*
@@ -1040,6 +1043,7 @@
 ;;; and storing the discriminating function, and clearing the effective method
 ;;; function table.
 
+#|
 (defun finalize-generic-function (gf)
     (setf (generic-function-discriminating-function gf)
           (funcall (if (eq (class-of gf) the-class-standard-gf)
@@ -1052,11 +1056,13 @@
                 (generic-function-discriminating-function gf))
     (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
     (values))
-
+|#
 
 
 (defun finalize-generic-function (gf)
     (let ((fname (generic-function-name gf)))
+
+        (print (list 'finalize-generic fname))
 
         (if (and (consp fname) (equal (car fname) 'setf))
             (print (list 'defsetf! fname)))
@@ -1085,6 +1091,7 @@
           (lambda-list (get-keyword-from all-keys :lambda-list))
           (method-class (get-keyword-from all-keys :method-class))
           (gf (std-allocate-instance the-class-standard-gf)))
+        (print (list 'make-instance-standard-generic-function name))
         ;;(print all-keys)
         ;;(print lambda-list)
         ;;(print name)
@@ -1093,6 +1100,7 @@
         (setf (generic-function-methods gf) ())
         (setf (generic-function-method-class gf) method-class)
         ;;(setf (classes-to-emf-table gf) (make-hash-table :test #'equal))
+        (print (list 'make-instance-std-generic name 'call-finilizer))
         (finalize-generic-function gf)
         gf))
 
