@@ -1058,7 +1058,7 @@
 (defun finalize-generic-function (gf)
     (let ((fname (generic-function-name gf)))
 
-        (if ((and (consp fname) (equal (car fn) 'setf)))
+        (if (and (consp fname) (equal (car fn) 'setf))
             (print (list 'defsetf! fname)))
 
         (setf (generic-function-discriminating-function gf)
