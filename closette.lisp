@@ -45,10 +45,6 @@
 ;;; Standard instances
 ;;;
 
-;;; This implementation uses structures for instances, because they're the only
-;;; kind of Lisp object that can be easily made to print whatever way we want.
-
-
 (jscl::def!struct (std-instance (:constructor allocate-std-instance (class slots))
                                 (:predicate std-instance-p))
     class
@@ -89,10 +85,6 @@
 ;;; standard-class must be determined without making any further slot
 ;;; references.
 
-;;; todo: to global vars
-#+nil (defvar the-slots-of-standard-class) ;standard-class's class-slots
-#+nil (defvar the-class-standard-class)    ;standard-class's class metaobject
-
 (defvar *the-slots-of-standard-class*) ;standard-class's class-slots
 (defvar *the-class-standard-class*)    ;standard-class's class metaobject
 
@@ -118,18 +110,8 @@
                         pos))))))
 
 ;;; slot-contents
-
-
 (defun slot-contents (slots location)
     (aref slots location))
-
-#|
-(defun setf-slot-contents (slots location new-value)
-    (setf (aref slots location) new-value))
-
-(defsetf slot-contents setf-slot-contents)
-|#
-
 (defun* (setf slot-contents) (slots location new-value)
     (setf (aref slots location) new-value))
 
@@ -145,15 +127,6 @@
             (error "The slot ~S is unbound in the object ~S."
                    slot-name instance)
             val)))
-#|
-(defun setf-std-slot-value (instance slot-name new-value)
-    (let ((location (slot-location (class-of instance) slot-name))
-          (slots (std-instance-slots instance)))
-        (setf (slot-contents slots location) new-value)))
-
-(defsetf std-slot-value setf-std-slot-value)
-|#
-
 
 (defun* (setf std-slot-value) (instance slot-name new-value)
     (let ((location (slot-location (class-of instance) slot-name))
@@ -162,22 +135,10 @@
 
 
 ;;; slot-value
-
 (defun slot-value (object slot-name)
     (if (eq (class-of (class-of object)) *the-class-standard-class*)
         (std-slot-value object slot-name)
         (slot-value-using-class (class-of object) object slot-name)))
-
-#|
-(defun setf-slot-value (object slot-name new-value)
-    (if (eq (class-of (class-of object)) the-class-standard-class)
-        (setf (std-slot-value object slot-name) new-value)
-        (setf-slot-value-using-class
-         new-value (class-of object) object slot-name)))
-
-
-(defsetf slot-value setf-slot-value)
-|#
 
 (defun* (setf slot-value) (object slot-name new-value)
     (if (eq (class-of (class-of object)) *the-class-standard-class*)
@@ -233,19 +194,12 @@
     (typecase x
       ;;(null                                          (find-class 'null))
       (symbol                       (find-class 'symbol))
-      ;;((complex *)                                   (find-class 'complex))
       (integer                                  (find-class 'integer))
       (float                                   (find-class 'float))
       (cons                                          (find-class 'cons))
       (character                                     (find-class 'character))
-      ;;(hash-table                                    (find-class 'hash-table))
       (package                                       (find-class 'package))
-      ;;(pathname                                      (find-class 'pathname))
-      ;;(readtable                                     (find-class 'readtable))
-      ;;(stream                                        (find-class 'stream))
-      ;;(number (find-class 'number))
       (string                                    (find-class 'string))
-      ;;((bit-vector *)                                (find-class 'bit-vector))
       (vector  (find-class 'vector))
       (array                (find-class 'array))
       (sequence         (find-class 'sequence))
@@ -255,7 +209,6 @@
 
 
 ;;; subclassp and sub-specializer-p
-
 (defun subclassp (c1 c2)
     (not (null (find c2 (class-precedence-list c1)))))
 
@@ -285,12 +238,6 @@
 ;;; class-name
 (defun class-name (class) (std-slot-value class 'name))
 
-#|
-(defun setf-class-name (class new-value)
-    (setf (slot-value class 'name) new-value))
-(defsetf class-name setf-class-name)
-|#
-
 (defun* (setf class-name) (class new-value)
     (setf (slot-value class 'name) new-value))
 
@@ -299,9 +246,6 @@
 ;;; class-direct-superclasses
 (defun class-direct-superclasses (class)
     (slot-value class 'direct-superclasses))
-#+nil (defun setf-class-direct-superclasses (class new-value)
-          (setf (slot-value class 'direct-superclasses) new-value))
-#+nil (defsetf class-direct-superclasses setf-class-direct-superclasses)
 
 (defun* (setf class-direct-superclasses) (class new-value)
     (setf (slot-value class 'direct-superclasses) new-value))
@@ -310,9 +254,6 @@
 ;;; class-direct-slots
 (defun class-direct-slots (class)
     (slot-value class 'direct-slots))
-#+nil (defun setf-class-direct-slots (class new-value)
-          (setf (slot-value class 'direct-slots) new-value))
-#+nil (defsetf class-direct-slots setf-class-direct-slots)
 
 (defun* (setf class-direct-slots) (class new-value)
     (setf (slot-value class 'direct-slots) new-value))
@@ -321,9 +262,6 @@
 ;;; class-precedence-list
 (defun class-precedence-list (class)
     (slot-value class 'class-precedence-list))
-#+nil (defun setf-class-precedence-list (class new-value)
-          (setf (slot-value class 'class-precedence-list) new-value))
-#+nil (defsetf class-precedence-list setf-class-precedence-list)
 
 (defun* (setf class-precedence-list) (class new-value)
     (setf (slot-value class 'class-precedence-list) new-value))
@@ -333,9 +271,6 @@
 ;;; class-slots
 (defun class-slots (class)
     (slot-value class 'effective-slots))
-#+nil (defun setf-class-slots (class new-value)
-          (setf (slot-value class 'effective-slots) new-value))
-#+nil (defsetf class-slots setf-class-slots)
 
 (defun* (setf class-slots) (class new-value)
     (setf (slot-value class 'effective-slots) new-value))
@@ -344,9 +279,6 @@
 ;;; class-direct-subclasses
 (defun class-direct-subclasses (class)
     (slot-value class 'direct-subclasses))
-#+nil (defun setf-class-direct-subclasses (class new-value)
-          (setf (slot-value class 'direct-subclasses) new-value))
-#+nil (defsetf class-direct-subclasses setf-class-direct-subclasses)
 
 (defun* (setf class-direct-subclasses) (class new-value)
     (setf (slot-value class 'direct-subclasses) new-value))
@@ -356,9 +288,6 @@
 ;;; class-direct-methods
 (defun class-direct-methods (class)
     (slot-value class 'direct-methods))
-#+nil (defun setf-class-direct-methods (class new-value)
-          (setf (slot-value class 'direct-methods) new-value))
-#+nil (defsetf class-direct-methods setf-class-direct-methods)
 
 (defun* (setf class-direct-methods) (class new-value)
     (setf (slot-value class 'direct-methods) new-value))
@@ -458,11 +387,6 @@
         (if (and (null class) errorp)
             (error "No class named ~S." symbol)
             class)))
-
-(defun setf-find-class (symbol new-value)
-    (setf (gethash symbol *class-table*) new-value))
-
-#+nil (defsetf find-class setf-find-class)
 
 (defun forget-all-classes ()
     (setf *class-table* (make-hash-table :test #'eq))
@@ -572,9 +496,6 @@
 ;;; slot-definition-name
 (defun slot-definition-name (slot)
     (getf slot ':name))
-#+nil (defun setf-slot-definition-name (slot new-value)
-          (setf (getf* slot ':name) new-value))
-#+nil (defsetf slot-definition-name setf-slot-definition-name)
 
 (defun* (setf slot-definition-name) (slot new-value)
     (setf (getf* slot ':name) new-value))
@@ -583,9 +504,6 @@
 ;;; slot-definition-initfunction
 (defun slot-definition-initfunction (slot)
     (getf slot ':initfunction))
-#+nil (defun setf-slot-definition-initfunction (slot new-value)
-          (setf (getf* slot ':initfunction) new-value))
-#+nil (defsetf slot-definition-initfunction setf-slot-definition-initfunction)
 
 (defun* (setf slot-definition-initfunction) (slot new-value)
     (setf (getf* slot ':initfunction) new-value))
@@ -595,9 +513,6 @@
 ;;; slot-definition-initform
 (defun slot-definition-initform (slot)
     (getf slot ':initform))
-#+nil (defun setf-slot-definition-initform (slot new-value)
-          (setf (getf* slot ':initform) new-value))
-#+nil (defsetf slot-definition-initform setf-slot-definition-initform)
 
 (defun* (setf slot-definition-initform) (slot new-value)
     (setf (getf* slot ':initform) new-value))
@@ -606,9 +521,6 @@
 ;;; slot-definition-initargs
 (defun slot-definition-initargs (slot)
     (getf slot ':initargs))
-#+nil (defun setf-slot-definition-initargs (slot new-value)
-          (setf (getf* slot ':initargs) new-value))
-#+nil (defsetf slot-definition-initargs setf-slot-definition-initargs)
 
 (defun* (setf slot-definition-initargs) (slot new-value)
     (setf (getf* slot ':initargs) new-value))
@@ -617,9 +529,6 @@
 ;;; slot-definition-readers
 (defun slot-definition-readers (slot)
     (getf slot ':readers))
-#+nil (defun setf-slot-definition-readers (slot new-value)
-          (setf (getf* slot ':readers) new-value))
-#+nil (defsetf slot-definition-readers setf-slot-definition-readers)
 
 (defun* (setf slot-definition-readers) (slot new-value)
     (setf (getf* slot ':readers) new-value))
@@ -628,9 +537,6 @@
 ;;; slot-definition-writers
 (defun slot-definition-writers (slot)
     (getf slot ':writers))
-#+nil (defun setf-slot-definition-writers (slot new-value)
-          (setf (getf* slot ':writers) new-value))
-#+nil (defsetf slot-definition-writers setf-slot-definition-writers)
 
 (defun* (setf slot-definition-writers) (slot new-value)
     (setf (getf* slot ':writers) new-value))
@@ -640,9 +546,6 @@
 ;;; slot-definition-allocation
 (defun slot-definition-allocation (slot)
     (getf slot ':allocation))
-#+nil (defun setf-slot-definition-allocation (slot new-value)
-          (setf (getf* slot ':allocation) new-value))
-#+nil (defsetf slot-definition-allocation setf-slot-definition-allocation)
 
 (defun* (setf slot-definition-allocation) (slot new-value)
     (setf (getf* slot ':allocation) new-value))
@@ -663,7 +566,6 @@
     (values))
 
 ;;; Class precedence lists
-
 (defun std-compute-class-precedence-list (class)
     (let ((classes-to-order (collect-superclasses* class)))
         (topological-sort classes-to-order
@@ -786,19 +688,6 @@
 ;;; Generic function metaobjects and standard-generic-function
 ;;;
 
-#+nil (defparameter the-defclass-standard-generic-function
-        '(defclass standard-generic-function ()
-          ((name :initarg :name)      ; :accessor generic-function-name
-           (lambda-list               ; :accessor generic-function-lambda-list
-            :initarg :lambda-list)
-           (methods :initform ())     ; :accessor generic-function-methods
-           (method-class              ; :accessor generic-function-method-class
-            :initarg :method-class)
-           (discriminating-function)  ; :accessor generic-function-
-                                        ;    -discriminating-function
-           (classes-to-emf-table      ; :accessor classes-to-emf-table
-            :initform (make-hash-table :test #'eq)))))
-
 (defparameter *the-defclass-standard-generic-function*
   '(defclass standard-generic-function ()
     ((name :initarg :name)      ; :accessor generic-function-name
@@ -813,18 +702,12 @@
       :initform (make-hash-table :test #'eq)))))
 
 
-#+nil (defvar the-class-standard-gf) ;standard-generic-function's class metaobject
 (defvar *the-class-standard-gf*) ;standard-generic-function's class metaobject
 
 
 ;;; generic-function-name
 (defun generic-function-name (gf)
     (slot-value gf 'name))
-#|
-(defun setf-generic-function-name (gf new-value)
-    (setf (slot-value gf 'name) new-value))
-(defsetf generic-function-name setf-generic-function-name)
-|#
 
 (defun* (setf generic-function-name) (gf new-value)
     (setf (slot-value gf 'name) new-value))
@@ -836,10 +719,6 @@
 (defun generic-function-lambda-list (gf)
     (slot-value gf 'lambda-list))
 
-#+nil (defun setf-generic-function-lambda-list (gf new-value)
-          (setf (slot-value gf 'lambda-list) new-value))
-#+nil (defsetf generic-function-lambda-list setf-generic-function-lambda-list)
-
 (defun* (setf generic-function-lambda-list) (gf new-value)
     (setf (slot-value gf 'lambda-list) new-value))
 
@@ -848,9 +727,6 @@
 ;;; generic-function-methods
 (defun generic-function-methods (gf)
     (slot-value gf 'methods))
-#+nil (defun setf-generic-function-methods (gf new-value)
-          (setf (slot-value gf 'methods) new-value))
-#+nil (defsetf generic-function-methods setf-generic-function-methods)
 
 (defun* (setf generic-function-methods) (gf new-value)
     (setf (slot-value gf 'methods) new-value))
@@ -860,9 +736,6 @@
 ;;; generic-function-discriminating-function
 (defun generic-function-discriminating-function (gf)
     (slot-value gf 'discriminating-function))
-#+nil (defun setf-generic-function-discriminating-function (gf new-value)
-          (setf (slot-value gf 'discriminating-function) new-value))
-#+nil (defsetf generic-function-discriminating-function setf-generic-function-discriminating-function)
 
 (defun* (setf generic-function-discriminating-function) (gf new-value)
     (setf (slot-value gf 'discriminating-function) new-value))
@@ -871,9 +744,6 @@
 ;;; generic-function-method-class
 (defun generic-function-method-class (gf)
     (slot-value gf 'method-class))
-#+nil (defun setf-generic-function-method-class (gf new-value)
-          (setf (slot-value gf 'method-class) new-value))
-#+nil (defsetf generic-function-method-class setf-generic-function-method-class)
 
 (defun* (setf generic-function-method-class) (gf new-value)
     (setf (slot-value gf 'method-class) new-value))
@@ -884,9 +754,6 @@
 
 (defun classes-to-emf-table (gf)
     (slot-value gf 'classes-to-emf-table))
-#+nil (defun setf-classes-to-emf-table (gf new-value)
-          (setf (slot-value gf 'classes-to-emf-table) new-value))
-#+nil (defsetf classes-to-emf-table setf-classes-to-emf-table)
 
 (defun* (setf classes-to-emf-table) (gf new-value)
     (setf (slot-value gf 'classes-to-emf-table) new-value))
@@ -896,16 +763,6 @@
 ;;;
 ;;; Method metaobjects and standard-method
 ;;;
-
-#+nil (defparameter the-defclass-standard-method
-        '(defclass standard-method ()
-          ((lambda-list :initarg :lambda-list)     ; :accessor method-lambda-list
-           (qualifiers :initarg :qualifiers)       ; :accessor method-qualifiers
-           (specializers :initarg :specializers)   ; :accessor method-specializers
-           (body :initarg :body)                   ; :accessor method-body
-           (environment :initarg :environment)     ; :accessor method-environment
-           (generic-function :initform nil)        ; :accessor method-generic-function
-           (function))))                           ; :accessor method-function
 
 (defparameter *the-defclass-standard-method*
   '(defclass standard-method ()
@@ -918,16 +775,11 @@
      (function))))                           ; :accessor method-function
 
 
-
-#+nil (defvar the-class-standard-method)    ;standard-method's class metaobject
 (defvar *the-class-standard-method*)    ;standard-method's class metaobject
 
 
 ;;; method-lambda-list
 (defun method-lambda-list (method) (slot-value method 'lambda-list))
-#+nil (defun setf-method-lambda-list (method new-value)
-          (setf (slot-value method 'lambda-list) new-value))
-#+nil (defsetf method-lambda-list setf-method-lambda-list)
 
 (defun* (setf method-lambda-list) (method new-value)
     (setf (slot-value method 'lambda-list) new-value))
@@ -937,9 +789,6 @@
 
 ;;; method-qualifiers
 (defun method-qualifiers (method) (slot-value method 'qualifiers))
-#+nil (defun setf-method-qualifiers (method new-value)
-          (setf (slot-value method 'qualifiers) new-value))
-#+nil (defsetf method-qualifiers setf-method-qualifiers)
 
 (defun* (setf method-qualifiers) (method new-value)
     (setf (slot-value method 'qualifiers) new-value))
@@ -947,9 +796,6 @@
 
 ;;; method-specializers
 (defun method-specializers (method) (slot-value method 'specializers))
-#+nil (defun setf-method-specializers (method new-value)
-          (setf (slot-value method 'specializers) new-value))
-#+nil (defsetf method-specializers setf-method-specializers)
 
 (defun* (setf method-specializers) (method new-value)
     (setf (slot-value method 'specializers) new-value))
@@ -958,9 +804,6 @@
 
 ;;; method-body
 (defun method-body (method) (slot-value method 'body))
-#+nil (defun setf-method-body (method new-value)
-          (setf (slot-value method 'body) new-value))
-#+nil (defsetf method-body setf-method-body)
 
 (defun* (setf method-body) (method new-value)
     (setf (slot-value method 'body) new-value))
@@ -970,9 +813,6 @@
 
 ;;; method-environment
 (defun method-environment (method) (slot-value method 'environment))
-#+nil (defun setf-method-environment (method new-value)
-          (setf (slot-value method 'environment) new-value))
-#+nil (defsetf method-environment setf-method-environment)
 
 (defun* (setf method-environment) (method new-value)
     (setf (slot-value method 'environment) new-value))
@@ -981,9 +821,6 @@
 ;;; method-generic-function
 (defun method-generic-function (method)
     (slot-value method 'generic-function))
-#+nil (defun setf-method-generic-function (method new-value)
-          (setf (slot-value method 'generic-function) new-value))
-#+nil (defsetf method-generic-function setf-method-generic-function)
 
 (defun* (setf method-generic-function) (method new-value)
     (setf (slot-value method 'generic-function) new-value))
@@ -992,9 +829,6 @@
 
 ;;; method-function
 (defun method-function (method) (slot-value method 'function))
-#+nil (defun setf-method-function (method new-value)
-          (setf (slot-value method 'function) new-value))
-#+nil (defsetf method-function setf-method-function)
 
 (defun* (setf method-function) (method new-value)
     (setf (slot-value method 'function) new-value))
@@ -1039,10 +873,6 @@
             (error "No generic function named ~S." symbol)
             gf)))
 
-#+nil (defun setf-find-generic-function (symbol new-value)
-          (setf (gethash symbol *generic-function-table*) new-value))
-#+nil (defsetf find-generic-function setf-find-generic-function)
-
 (defun* (setf find-generic-function) (symbol new-value)
     (setf (gethash symbol *generic-function-table*) new-value))
 
@@ -1053,7 +883,6 @@
 
 ;;; ensure-generic-function
 (defun ensure-generic-function (function-name &rest all-keys)
-    ;;(print (list 'ensure-generic-function function-name ))
     (if (find-generic-function function-name nil)
         (find-generic-function function-name)
         (let*
@@ -1105,16 +934,11 @@
           (lambda-list (get-keyword-from all-keys :lambda-list))
           (method-class (get-keyword-from all-keys :method-class))
           (gf (std-allocate-instance *the-class-standard-gf*)))
-        ;;(print (list 'make-instance-standard-generic-function name))
-        ;;(print all-keys)
-        ;;(print lambda-list)
-        ;;(print name)
         (setf (generic-function-name gf) name)
         (setf (generic-function-lambda-list gf) lambda-list)
         (setf (generic-function-methods gf) ())
         (setf (generic-function-method-class gf) method-class)
         ;;(setf (classes-to-emf-table gf) (make-hash-table :test #'equal))
-        ;;(print (list 'make-instance-std-generic name 'call-finilizer))
         (finalize-generic-function gf)
         gf))
 
@@ -1196,7 +1020,6 @@
     (let ((plist (analyze-lambda-list specialized-lambda-list)))
         (getf plist ':specializers)))
 
-#+nil (defvar lambda-list-keywords '(&optional &rest &key &aux &allow-other-keys))
 (defvar *lambda-list-keywords* '(&optional &rest &key &aux &allow-other-keys))
 
 (defun analyze-lambda-list (lambda-list)
@@ -1258,8 +1081,6 @@
 
 ;;; ensure method
 (defun ensure-method (gf &rest all-keys)
-    #+nil (let ((fn-name (generic-function-name gf)))
-              (print (list 'ensure-method fn-name 'type (type-of fn-name))))
     (let ((new-method
             (apply
              (if (eq (generic-function-method-class gf) *the-class-standard-method*)
@@ -1293,8 +1114,6 @@
 ;;; with the same qualifiers and specializers.  It's a pain to develop
 ;;; programs without this feature of full CLOS.
 (defun add-method (gf method)
-    #+nil (let ((fn-name (generic-function-name gf)))
-              (print (list 'add-method fn-name 'type (type-of fn-name))))
     (let ((old-method
             (find-method gf (method-qualifiers method)
                          (method-specializers method) nil)))
@@ -1307,8 +1126,6 @@
     method)
 
 (defun remove-method (gf method)
-    #+nil (let ((fn-name (generic-function-name gf)))
-              (print (list 'remove-method fn-name 'type (type-of fn-name))))
     (setf (generic-function-methods gf)
           (remove method (generic-function-methods gf)))
     (setf (method-generic-function method) nil)
@@ -1319,8 +1136,6 @@
     method)
 
 (defun find-method (gf qualifiers specializers &optional (errorp t))
-    #+nil (let ((fn-name (generic-function-name gf)))
-              (print (list 'find-method fn-name 'type (type-of fn-name))))
     (let ((method
             (find-if #'(lambda (method)
                            (and (eq qualifiers
@@ -1334,7 +1149,6 @@
 
 ;;; Reader and write methods
 (defun add-reader-method (class fn-name slot-name)
-    #+nil (print (list 'add-reader fn-name 'type (type-of fn-name)))
     (ensure-method
      (ensure-generic-function fn-name :lambda-list '(object))
      :lambda-list '(object)
@@ -1345,7 +1159,6 @@
     (values))
 
 (defun add-writer-method (class fn-name slot-name)
-    #+nil (print (list 'add-writer fn-name 'type (type-of fn-name)))
     (ensure-method
      (ensure-generic-function  fn-name :lambda-list '(object new-value))
      :lambda-list '(object new-value)
@@ -1363,7 +1176,6 @@
 
 ;;; apply-generic-function ???
 (defun apply-generic-function (gf args)
-    ;;(#j:console:log "apply-generic-fn" (format nil "~a" args))
     (apply (generic-function-discriminating-function gf) args))
 
 ;;; compute-discriminating-function
@@ -1515,14 +1327,12 @@
     nil) ; Bogus top level lexical environment
 
 ;;; fuck he need?
-(defvar compile-methods nil)      ; by default, run everything interpreted
 (defvar *compile-methods* nil)      ; by default, run everything interpreted
 
 ;;; see above
 (defun compile-in-lexical-environment (env lambda-expr)
     (declare (ignore env))
-    ;;(print lambda-expr)
-    (if compile-methods
+    (if *compile-methods*
         (compile nil lambda-expr)
         (eval `(function ,lambda-expr))))
 
