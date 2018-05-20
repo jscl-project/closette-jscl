@@ -1046,11 +1046,34 @@
                        #'std-compute-discriminating-function
                        #'compute-discriminating-function)
                    gf))
-    ;;(print (list 'finalize-generic (generic-function-name gf)))
+    #+nil (print (list 'finalize-generic (type-of (generic-function-name gf))
+                       'name (generic-function-name gf)))
     (jscl::fset (generic-function-name gf)
                 (generic-function-discriminating-function gf))
     (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
     (values))
+
+
+
+(defun finalize-generic-function (gf)
+    (let ((fname (generic-function-name gf)))
+
+        (if ((and (consp fname) (equal (car fn) 'setf)))
+            (print (list 'defsetf! fname)))
+
+        (setf (generic-function-discriminating-function gf)
+              (funcall (if (eq (class-of gf) the-class-standard-gf)
+                           #'std-compute-discriminating-function
+                           #'compute-discriminating-function)
+                       gf))
+
+        (jscl::fset (generic-function-name gf)
+                    (generic-function-discriminating-function gf))
+        (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
+        (values)))
+
+
+
 
 ;;; make-instance-standard-generic-function creates and initializes an
 ;;; instance of standard-generic-function without falling into method lookup.
