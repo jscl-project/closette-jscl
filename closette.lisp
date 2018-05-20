@@ -76,7 +76,7 @@
     (allocate-std-instance
      :class (lambda () class)
      :slots (allocate-slot-storage (count-if #'instance-slot-p (class-slots class))
-                                   secret-unbound-value)))
+                                   *secret-unbound-value*)))
 
 ;;; Simple vectors are used for slot storage.
 
@@ -141,7 +141,7 @@
     (let* ((location (slot-location (class-of instance) slot-name))
            (slots (std-instance-slots instance))
            (val (slot-contents slots location)))
-        (if (equal secret-unbound-value val)
+        (if (equal *secret-unbound-value* val)
             (error "The slot ~S is unbound in the object ~S."
                    slot-name instance)
             val)))
@@ -190,7 +190,7 @@
 (defun std-slot-boundp (instance slot-name)
     (let ((location (slot-location (class-of instance) slot-name))
           (slots (std-instance-slots instance)))
-        (not (equal secret-unbound-value (slot-contents slots location)))))
+        (not (equal *secret-unbound-value* (slot-contents slots location)))))
 
 (defun slot-boundp (object slot-name)
     (if (eq (class-of (class-of object)) the-class-standard-class)
@@ -201,7 +201,7 @@
 (defun std-slot-makunbound (instance slot-name)
     (let ((location (slot-location (class-of instance) slot-name))
           (slots (std-instance-slots instance)))
-        (setf (slot-contents slots location) secret-unbound-value))
+        (setf (slot-contents slots location) *secret-unbound-value*))
     instance)
 
 (defun slot-makunbound (object slot-name)

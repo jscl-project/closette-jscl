@@ -31,7 +31,7 @@
       (allocate-std-instance
        :class 'tba
        :slots (make-array (length the-slots-of-standard-class)
-                          :initial-element secret-unbound-value)))
+                          :initial-element *secret-unbound-value*)))
 
 ;; 3. Install standard-class's (circular) class-of link.
 ;;;(setf (std-instance-class the-class-standard-class) the-class-standard-class)
