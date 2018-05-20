@@ -1058,7 +1058,7 @@
 (defun finalize-generic-function (gf)
     (let ((fname (generic-function-name gf)))
 
-        (if (and (consp fname) (equal (car fn) 'setf))
+        (if (and (consp fname) (equal (car fname) 'setf))
             (print (list 'defsetf! fname)))
 
         (setf (generic-function-discriminating-function gf)
@@ -1268,6 +1268,8 @@
 ;;; with the same qualifiers and specializers.  It's a pain to develop
 ;;; programs without this feature of full CLOS.
 (defun add-method (gf method)
+    (let ((fn-name (generic-function-name gf)))
+        (print (list 'add-method fn-name 'type (type-of fn-name))))
     (let ((old-method
             (find-method gf (method-qualifiers method)
                          (method-specializers method) nil)))
@@ -1303,6 +1305,7 @@
 
 ;;; Reader and write methods
 (defun add-reader-method (class fn-name slot-name)
+    (print (list 'add-reader fn-name 'type (type-of fn-name)))
     (ensure-method
      (ensure-generic-function fn-name :lambda-list '(object))
      :lambda-list '(object)
@@ -1314,7 +1317,7 @@
 
 (defun add-writer-method (class fn-name slot-name)
     ;;(#j:console:log "add-writer-method" (class-name class) fn-name slot-name)
-    ;;(print (list 'add-write 'type (type-of fn-name)))
+    (print (list 'add-writer fn-name 'type (type-of fn-name)))
     ;; => cons
     (ensure-method
      (ensure-generic-function fn-name :lambda-list '(object new-value))
