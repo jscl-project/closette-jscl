@@ -1235,6 +1235,8 @@
 
 ;;; ensure method
 (defun ensure-method (gf &rest all-keys)
+    (let ((fn-name (generic-function-name gf)))
+        (print (list 'ensure-method fn-name 'type (type-of fn-name))))
     (let ((new-method
             (apply
              (if (eq (generic-function-method-class gf) the-class-standard-method)
