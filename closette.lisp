@@ -1021,7 +1021,7 @@
 
 ;;; ensure-generic-function
 (defun ensure-generic-function (function-name &rest all-keys)
-    (print (list 'ensure-generic-function function-name ))
+    ;;(print (list 'ensure-generic-function function-name ))
     (if (find-generic-function function-name nil)
         (find-generic-function function-name)
         (let*
@@ -1043,40 +1043,22 @@
 ;;; and storing the discriminating function, and clearing the effective method
 ;;; function table.
 
-#|
+
 (defun finalize-generic-function (gf)
+    #+nil (let ((fname (generic-function-name gf)))
+              (if (and (consp fname) (equal (car fname) 'setf))
+                  (print (list 'defsetf! fname))))
+
     (setf (generic-function-discriminating-function gf)
           (funcall (if (eq (class-of gf) the-class-standard-gf)
                        #'std-compute-discriminating-function
                        #'compute-discriminating-function)
                    gf))
-    #+nil (print (list 'finalize-generic (type-of (generic-function-name gf))
-                       'name (generic-function-name gf)))
+
     (jscl::fset (generic-function-name gf)
                 (generic-function-discriminating-function gf))
     (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
     (values))
-|#
-
-
-(defun finalize-generic-function (gf)
-    (let ((fname (generic-function-name gf)))
-
-        (print (list 'finalize-generic fname))
-
-        (if (and (consp fname) (equal (car fname) 'setf))
-            (print (list 'defsetf! fname)))
-
-        (setf (generic-function-discriminating-function gf)
-              (funcall (if (eq (class-of gf) the-class-standard-gf)
-                           #'std-compute-discriminating-function
-                           #'compute-discriminating-function)
-                       gf))
-
-        (jscl::fset (generic-function-name gf)
-                    (generic-function-discriminating-function gf))
-        (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
-        (values)))
 
 
 
@@ -1091,7 +1073,7 @@
           (lambda-list (get-keyword-from all-keys :lambda-list))
           (method-class (get-keyword-from all-keys :method-class))
           (gf (std-allocate-instance the-class-standard-gf)))
-        (print (list 'make-instance-standard-generic-function name))
+        ;;(print (list 'make-instance-standard-generic-function name))
         ;;(print all-keys)
         ;;(print lambda-list)
         ;;(print name)
@@ -1100,7 +1082,7 @@
         (setf (generic-function-methods gf) ())
         (setf (generic-function-method-class gf) method-class)
         ;;(setf (classes-to-emf-table gf) (make-hash-table :test #'equal))
-        (print (list 'make-instance-std-generic name 'call-finilizer))
+        ;;(print (list 'make-instance-std-generic name 'call-finilizer))
         (finalize-generic-function gf)
         gf))
 
@@ -1243,8 +1225,8 @@
 
 ;;; ensure method
 (defun ensure-method (gf &rest all-keys)
-    (let ((fn-name (generic-function-name gf)))
-        (print (list 'ensure-method fn-name 'type (type-of fn-name))))
+    #+nil (let ((fn-name (generic-function-name gf)))
+              (print (list 'ensure-method fn-name 'type (type-of fn-name))))
     (let ((new-method
             (apply
              (if (eq (generic-function-method-class gf) the-class-standard-method)
@@ -1278,8 +1260,8 @@
 ;;; with the same qualifiers and specializers.  It's a pain to develop
 ;;; programs without this feature of full CLOS.
 (defun add-method (gf method)
-    (let ((fn-name (generic-function-name gf)))
-        (print (list 'add-method fn-name 'type (type-of fn-name))))
+    #+nil (let ((fn-name (generic-function-name gf)))
+              (print (list 'add-method fn-name 'type (type-of fn-name))))
     (let ((old-method
             (find-method gf (method-qualifiers method)
                          (method-specializers method) nil)))
@@ -1292,8 +1274,8 @@
     method)
 
 (defun remove-method (gf method)
-    (let ((fn-name (generic-function-name gf)))
-        (print (list 'remove-method fn-name 'type (type-of fn-name))))
+    #+nil (let ((fn-name (generic-function-name gf)))
+              (print (list 'remove-method fn-name 'type (type-of fn-name))))
     (setf (generic-function-methods gf)
           (remove method (generic-function-methods gf)))
     (setf (method-generic-function method) nil)
@@ -1304,8 +1286,8 @@
     method)
 
 (defun find-method (gf qualifiers specializers &optional (errorp t))
-    (let ((fn-name (generic-function-name gf)))
-        (print (list 'find-method fn-name 'type (type-of fn-name))))
+    #+nil (let ((fn-name (generic-function-name gf)))
+              (print (list 'find-method fn-name 'type (type-of fn-name))))
     (let ((method
             (find-if #'(lambda (method)
                            (and (eq qualifiers
@@ -1319,7 +1301,7 @@
 
 ;;; Reader and write methods
 (defun add-reader-method (class fn-name slot-name)
-    (print (list 'add-reader fn-name 'type (type-of fn-name)))
+    #+nil (print (list 'add-reader fn-name 'type (type-of fn-name)))
     (ensure-method
      (ensure-generic-function fn-name :lambda-list '(object))
      :lambda-list '(object)
@@ -1330,9 +1312,7 @@
     (values))
 
 (defun add-writer-method (class fn-name slot-name)
-    ;;(#j:console:log "add-writer-method" (class-name class) fn-name slot-name)
-    (print (list 'add-writer fn-name 'type (type-of fn-name)))
-    ;; => cons
+    #+nil (print (list 'add-writer fn-name 'type (type-of fn-name)))
     (ensure-method
      (ensure-generic-function  fn-name :lambda-list '(object new-value))
      :lambda-list '(object new-value)
