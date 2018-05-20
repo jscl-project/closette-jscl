@@ -64,7 +64,7 @@
 
 ;;; Standard instance allocation
 
-(defparameter secret-unbound-value (list "slot unbound"))
+#+nil (defparameter secret-unbound-value (list "slot unbound"))
 (defparameter *secret-unbound-value* (list "slot unbound"))
 
 (defun instance-slot-p (slot)
@@ -90,8 +90,8 @@
 ;;; references.
 
 ;;; todo: to global vars
-(defvar the-slots-of-standard-class) ;standard-class's class-slots
-(defvar the-class-standard-class)    ;standard-class's class metaobject
+#+nil (defvar the-slots-of-standard-class) ;standard-class's class-slots
+#+nil (defvar the-class-standard-class)    ;standard-class's class metaobject
 
 (defvar *the-slots-of-standard-class*) ;standard-class's class-slots
 (defvar *the-class-standard-class*)    ;standard-class's class metaobject
