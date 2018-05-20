@@ -1334,12 +1334,11 @@
     (print (list 'add-writer fn-name 'type (type-of fn-name)))
     ;; => cons
     (ensure-method
-     (ensure-generic-function fn-name :lambda-list '(object new-value))
+     (ensure-generic-function  fn-name :lambda-list '(object new-value))
      :lambda-list '(object new-value)
      :qualifiers ()
      :specializers (list (find-class 't) class)
-     :body `(setf (slot-value object ',slot-name)
-                  new-value)
+     :body `(setf (slot-value object ',slot-name) new-value)
      :environment (top-level-environment))
     (values))
 
