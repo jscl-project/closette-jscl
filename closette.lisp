@@ -99,7 +99,7 @@
 
 (defun slot-location (class slot-name)
     (if (and (eq slot-name 'effective-slots)
-             (eq class the-class-standard-class))
+             (eq class *the-class-standard-class*))
         (position 'effective-slots *the-slots-of-standard-class*
                   :key #'slot-definition-name)
         (let ((slot (find slot-name
@@ -164,7 +164,7 @@
 ;;; slot-value
 
 (defun slot-value (object slot-name)
-    (if (eq (class-of (class-of object)) the-class-standard-class)
+    (if (eq (class-of (class-of object)) *the-class-standard-class*)
         (std-slot-value object slot-name)
         (slot-value-using-class (class-of object) object slot-name)))
 
@@ -180,7 +180,7 @@
 |#
 
 (defun* (setf slot-value) (object slot-name new-value)
-    (if (eq (class-of (class-of object)) the-class-standard-class)
+    (if (eq (class-of (class-of object)) *the-class-standard-class*)
         (setf (std-slot-value object slot-name) new-value)
         (setf-slot-value-using-class
          new-value (class-of object) object slot-name)))
@@ -193,7 +193,7 @@
         (not (equal *secret-unbound-value* (slot-contents slots location)))))
 
 (defun slot-boundp (object slot-name)
-    (if (eq (class-of (class-of object)) the-class-standard-class)
+    (if (eq (class-of (class-of object)) *the-class-standard-class*)
         (std-slot-boundp object slot-name)
         (slot-boundp-using-class (class-of object) object slot-name)))
 
@@ -205,7 +205,7 @@
     instance)
 
 (defun slot-makunbound (object slot-name)
-    (if (eq (class-of (class-of object)) the-class-standard-class)
+    (if (eq (class-of (class-of object)) *the-class-standard-class*)
         (std-slot-makunbound object slot-name)
         (slot-makunbound-using-class (class-of object) object slot-name)))
 
@@ -215,7 +215,7 @@
                      :key #'slot-definition-name))))
 
 (defun slot-exists-p (object slot-name)
-    (if (eq (class-of (class-of object)) the-class-standard-class)
+    (if (eq (class-of (class-of object)) *the-class-standard-class*)
         (std-slot-exists-p object slot-name)
         (slot-exists-p-using-class (class-of object) object slot-name)))
 
@@ -485,8 +485,8 @@
 (defun ensure-class (name &rest all-keys)
     (if (find-class name nil)
         (error "Can't redefine the class named ~S." name)
-        (let* ((metaclass (get-keyword-from all-keys :metaclass the-class-standard-class))
-               (class (apply (if (eq metaclass the-class-standard-class)
+        (let* ((metaclass (get-keyword-from all-keys :metaclass *the-class-standard-class*))
+               (class (apply (if (eq metaclass *the-class-standard-class*)
                                  'make-instance-standard-class
                                  'make-instance)
                              metaclass :name name all-keys)))
@@ -502,7 +502,7 @@
     (metaclass &key name direct-superclasses direct-slots
      &allow-other-keys)
     (declare (ignore metaclass ))
-    (let ((class (std-allocate-instance the-class-standard-class)))
+    (let ((class (std-allocate-instance *the-class-standard-class*)))
         (setf (class-name class) name)
         (setf (class-direct-subclasses class) ())
         (setf (class-direct-methods class) ())
@@ -531,7 +531,7 @@
             (dolist (writer (slot-definition-writers direct-slot))
                 (add-writer-method
                  class writer (slot-definition-name direct-slot)))))
-    (funcall (if (eq (class-of class) the-class-standard-class)
+    (funcall (if (eq (class-of class) *the-class-standard-class*)
                  #'std-finalize-inheritance
                  #'finalize-inheritance)
              class)
@@ -653,12 +653,12 @@
 ;;; finalize-inheritance
 (defun std-finalize-inheritance (class)
     (setf (class-precedence-list class)
-          (funcall (if (eq (class-of class) the-class-standard-class)
+          (funcall (if (eq (class-of class) *the-class-standard-class*)
                        #'std-compute-class-precedence-list
                        #'compute-class-precedence-list)
                    class))
     (setf (class-slots class)
-          (funcall (if (eq (class-of class) the-class-standard-class)
+          (funcall (if (eq (class-of class) *the-class-standard-class*)
                        #'std-compute-slots
                        #'compute-slots)
                    class))
@@ -758,7 +758,7 @@
                        (mapcar #'slot-definition-name all-slots))))
         (mapcar #'(lambda (name)
                       (funcall
-                       (if (eq (class-of class) the-class-standard-class)
+                       (if (eq (class-of class) *the-class-standard-class*)
                            #'std-compute-effective-slot-definition
                            #'compute-effective-slot-definition)
                        class

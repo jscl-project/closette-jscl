@@ -27,7 +27,7 @@
               (nth 3 *the-defclass-standard-class*)))
 
 ;; 2. Create the standard-class metaobject by hand.
-(setf the-class-standard-class
+(setf *the-class-standard-class*
       (allocate-std-instance
        :class 'tba
        :slots (make-array (length *the-slots-of-standard-class*)
@@ -35,16 +35,16 @@
 
 ;; 3. Install standard-class's (circular) class-of link.
 ;;;(setf (std-instance-class the-class-standard-class) the-class-standard-class)
-(setf (std-instance-class the-class-standard-class) (lambda () the-class-standard-class))
+(setf (std-instance-class *the-class-standard-class*) (lambda () *the-class-standard-class*))
 ;; (It's now okay to use class-... accessor).
 
 ;; 4. Fill in standard-class's class-slots.
-(setf (class-slots the-class-standard-class) *the-slots-of-standard-class*)
+(setf (class-slots *the-class-standard-class*) *the-slots-of-standard-class*)
 ;; (Skeleton built; it's now okay to call make-instance-standard-class.)
 
 ;; 5. Hand build the class t so that it has no direct superclasses.
 (setf (find-class 't)
-      (let ((class (std-allocate-instance the-class-standard-class)))
+      (let ((class (std-allocate-instance *the-class-standard-class*)))
           (setf (class-name class) 't)
           (setf (class-direct-subclasses class) ())
           (setf (class-direct-superclasses class) ())
@@ -59,16 +59,16 @@
 (defclass standard-object (t) ())
 
 ;; 7. Define the full-blown version of standard-class.
-(setf the-class-standard-class (eval *the-defclass-standard-class*))
+(setf *the-class-standard-class* (eval *the-defclass-standard-class*))
 
 ;; 8. Replace all (3) existing pointers to the skeleton with real one.
 ;; note: lambda !!!
 (setf (std-instance-class (find-class 't))
-      (lambda () the-class-standard-class))
+      (lambda () *the-class-standard-class*))
 (setf (std-instance-class (find-class 'standard-object))
-      (lambda () the-class-standard-class))
-(setf (std-instance-class the-class-standard-class)
-      (lambda () the-class-standard-class))
+      (lambda () *the-class-standard-class*))
+(setf (std-instance-class *the-class-standard-class*)
+      (lambda () *the-class-standard-class*))
 
 
 ;; (Clear sailing from here on in).
