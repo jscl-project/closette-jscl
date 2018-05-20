@@ -788,18 +788,18 @@
 ;;; Generic function metaobjects and standard-generic-function
 ;;;
 
-(defparameter the-defclass-standard-generic-function
-  '(defclass standard-generic-function ()
-    ((name :initarg :name)      ; :accessor generic-function-name
-     (lambda-list               ; :accessor generic-function-lambda-list
-      :initarg :lambda-list)
-     (methods :initform ())     ; :accessor generic-function-methods
-     (method-class              ; :accessor generic-function-method-class
-      :initarg :method-class)
-     (discriminating-function)  ; :accessor generic-function-
+#+nil (defparameter the-defclass-standard-generic-function
+        '(defclass standard-generic-function ()
+          ((name :initarg :name)      ; :accessor generic-function-name
+           (lambda-list               ; :accessor generic-function-lambda-list
+            :initarg :lambda-list)
+           (methods :initform ())     ; :accessor generic-function-methods
+           (method-class              ; :accessor generic-function-method-class
+            :initarg :method-class)
+           (discriminating-function)  ; :accessor generic-function-
                                         ;    -discriminating-function
-     (classes-to-emf-table      ; :accessor classes-to-emf-table
-      :initform (make-hash-table :test #'eq)))))
+           (classes-to-emf-table      ; :accessor classes-to-emf-table
+            :initform (make-hash-table :test #'eq)))))
 
 (defparameter *the-defclass-standard-generic-function*
   '(defclass standard-generic-function ()
@@ -815,7 +815,7 @@
       :initform (make-hash-table :test #'eq)))))
 
 
-(defvar the-class-standard-gf) ;standard-generic-function's class metaobject
+#+nil (defvar the-class-standard-gf) ;standard-generic-function's class metaobject
 (defvar *the-class-standard-gf*) ;standard-generic-function's class metaobject
 
 
@@ -899,15 +899,15 @@
 ;;; Method metaobjects and standard-method
 ;;;
 
-(defparameter the-defclass-standard-method
-  '(defclass standard-method ()
-    ((lambda-list :initarg :lambda-list)     ; :accessor method-lambda-list
-     (qualifiers :initarg :qualifiers)       ; :accessor method-qualifiers
-     (specializers :initarg :specializers)   ; :accessor method-specializers
-     (body :initarg :body)                   ; :accessor method-body
-     (environment :initarg :environment)     ; :accessor method-environment
-     (generic-function :initform nil)        ; :accessor method-generic-function
-     (function))))                           ; :accessor method-function
+#+nil (defparameter the-defclass-standard-method
+        '(defclass standard-method ()
+          ((lambda-list :initarg :lambda-list)     ; :accessor method-lambda-list
+           (qualifiers :initarg :qualifiers)       ; :accessor method-qualifiers
+           (specializers :initarg :specializers)   ; :accessor method-specializers
+           (body :initarg :body)                   ; :accessor method-body
+           (environment :initarg :environment)     ; :accessor method-environment
+           (generic-function :initform nil)        ; :accessor method-generic-function
+           (function))))                           ; :accessor method-function
 
 (defparameter *the-defclass-standard-method*
   '(defclass standard-method ()
@@ -921,7 +921,7 @@
 
 
 
-(defvar the-class-standard-method)    ;standard-method's class metaobject
+#+nil (defvar the-class-standard-method)    ;standard-method's class metaobject
 (defvar *the-class-standard-method*)    ;standard-method's class metaobject
 
 
@@ -1059,9 +1059,9 @@
     (if (find-generic-function function-name nil)
         (find-generic-function function-name)
         (let*
-            ((generic-function-class (get-keyword-from all-keys :generic-function-class the-class-standard-gf))
-             (method-class (get-keyword-from all-keys :method-class the-class-standard-method))
-             (gf (apply (if (eq generic-function-class the-class-standard-gf)
+            ((generic-function-class (get-keyword-from all-keys :generic-function-class *the-class-standard-gf*))
+             (method-class (get-keyword-from all-keys :method-class *the-class-standard-method*))
+             (gf (apply (if (eq generic-function-class *the-class-standard-gf*)
                             #'make-instance-standard-generic-function
                             #'make-instance)
                         generic-function-class
@@ -1084,7 +1084,7 @@
                   (print (list 'defsetf! fname))))
 
     (setf (generic-function-discriminating-function gf)
-          (funcall (if (eq (class-of gf) the-class-standard-gf)
+          (funcall (if (eq (class-of gf) *the-class-standard-gf*)
                        #'std-compute-discriminating-function
                        #'compute-discriminating-function)
                    gf))
@@ -1106,7 +1106,7 @@
     (let ((name (get-keyword-from all-keys :name))
           (lambda-list (get-keyword-from all-keys :lambda-list))
           (method-class (get-keyword-from all-keys :method-class))
-          (gf (std-allocate-instance the-class-standard-gf)))
+          (gf (std-allocate-instance *the-class-standard-gf*)))
         ;;(print (list 'make-instance-standard-generic-function name))
         ;;(print all-keys)
         ;;(print lambda-list)
@@ -1198,7 +1198,7 @@
     (let ((plist (analyze-lambda-list specialized-lambda-list)))
         (getf plist ':specializers)))
 
-(defvar lambda-list-keywords '(&optional &rest &key &aux &allow-other-keys))
+#+nil (defvar lambda-list-keywords '(&optional &rest &key &aux &allow-other-keys))
 (defvar *lambda-list-keywords* '(&optional &rest &key &aux &allow-other-keys))
 
 (defun analyze-lambda-list (lambda-list)
@@ -1222,7 +1222,7 @@
               (allow-other-keys nil)
               (state :parsing-required))
             (dolist (arg lambda-list)
-                (if (member arg lambda-list-keywords)
+                (if (member arg *lambda-list-keywords*)
                     (ecase arg
                       (&optional
                        (setq state :parsing-optional))
@@ -1264,7 +1264,7 @@
               (print (list 'ensure-method fn-name 'type (type-of fn-name))))
     (let ((new-method
             (apply
-             (if (eq (generic-function-method-class gf) the-class-standard-method)
+             (if (eq (generic-function-method-class gf) *the-class-standard-method*)
                  #'make-instance-standard-method
                  #'make-instance)
              (generic-function-method-class gf)
@@ -1279,7 +1279,7 @@
                                       &key lambda-list qualifiers
                                         specializers body environment)
     (declare (ignore method-class))
-    (let ((method (std-allocate-instance the-class-standard-method)))
+    (let ((method (std-allocate-instance *the-class-standard-method*)))
         (setf (method-lambda-list method) lambda-list)
         (setf (method-qualifiers method) qualifiers)
         (setf (method-specializers method) specializers)
@@ -1383,7 +1383,7 @@
              (compute-applicable-methods-using-classes gf classes))
            (emfun
              (funcall
-              (if (eq (class-of gf) the-class-standard-gf)
+              (if (eq (class-of gf) *the-class-standard-gf*)
                   #'std-compute-effective-method-function
                   #'compute-effective-method-function)
               gf applicable-methods)))
@@ -1403,7 +1403,7 @@
                      (generic-function-methods gf)))
      #'(lambda (m1 m2)
            (funcall
-            (if (eq (class-of gf) the-class-standard-gf)
+            (if (eq (class-of gf) *the-class-standard-gf*)
                 #'std-method-more-specific-p
                 #'method-more-specific-p)
             gf m1 m2 required-classes))))
@@ -1447,7 +1447,7 @@
         (if around
             (let ((next-emfun
                     (funcall
-                     (if (eq (class-of gf) the-class-standard-gf)
+                     (if (eq (class-of gf) *the-class-standard-gf*)
                          #'std-compute-effective-method-function
                          #'compute-effective-method-function)
                      gf (remove around methods))))

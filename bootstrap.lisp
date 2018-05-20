@@ -96,8 +96,8 @@
 (defclass float (number) ())
 
 ;; 10. Define the other standard metaobject classes.
-(setf the-class-standard-gf (eval the-defclass-standard-generic-function))
-(setf the-class-standard-method (eval the-defclass-standard-method))
+(setf *the-class-standard-gf* (eval *the-defclass-standard-generic-function*))
+(setf *the-class-standard-method* (eval *the-defclass-standard-method*))
 ;; Voila! The class hierarchy is in place.
 ;; (It's now okay to define generic functions and methods.)
 
