@@ -12,7 +12,7 @@
 ;; How to create the class hierarchy in 10 easy steps:
 
 ;; 1. Figure out standard-class's slots.
-(setf the-slots-of-standard-class
+(setf *the-slots-of-standard-class*
       (mapcar #'(lambda (slotd)
                     (make-effective-slot-definition
                      :name (car slotd)
@@ -30,7 +30,7 @@
 (setf the-class-standard-class
       (allocate-std-instance
        :class 'tba
-       :slots (make-array (length the-slots-of-standard-class)
+       :slots (make-array (length *the-slots-of-standard-class*)
                           :initial-element *secret-unbound-value*)))
 
 ;; 3. Install standard-class's (circular) class-of link.
@@ -39,7 +39,7 @@
 ;; (It's now okay to use class-... accessor).
 
 ;; 4. Fill in standard-class's class-slots.
-(setf (class-slots the-class-standard-class) the-slots-of-standard-class)
+(setf (class-slots the-class-standard-class) *the-slots-of-standard-class*)
 ;; (Skeleton built; it's now okay to call make-instance-standard-class.)
 
 ;; 5. Hand build the class t so that it has no direct superclasses.

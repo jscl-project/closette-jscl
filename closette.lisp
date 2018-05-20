@@ -100,7 +100,7 @@
 (defun slot-location (class slot-name)
     (if (and (eq slot-name 'effective-slots)
              (eq class the-class-standard-class))
-        (position 'effective-slots the-slots-of-standard-class
+        (position 'effective-slots *the-slots-of-standard-class*
                   :key #'slot-definition-name)
         (let ((slot (find slot-name
                           (class-slots class)
