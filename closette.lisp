@@ -763,15 +763,26 @@
 ;;; Method metaobjects and standard-method
 ;;;
 
+#+nil (defparameter *the-defclass-standard-method*
+        '(defclass standard-method ()
+          ((lambda-list :initarg :lambda-list)     ; :accessor method-lambda-list
+           (qualifiers :initarg :qualifiers)       ; :accessor method-qualifiers
+           (specializers :initarg :specializers)   ; :accessor method-specializers
+           (body :initarg :body)                   ; :accessor method-body
+           (environment :initarg :environment)     ; :accessor method-environment
+           (generic-function :initform nil)        ; :accessor method-generic-function
+           (function))))                           ; :accessor method-function
+
+
 (defparameter *the-defclass-standard-method*
   '(defclass standard-method ()
     ((lambda-list :initarg :lambda-list)     ; :accessor method-lambda-list
      (qualifiers :initarg :qualifiers)       ; :accessor method-qualifiers
      (specializers :initarg :specializers)   ; :accessor method-specializers
      (body :initarg :body)                   ; :accessor method-body
-     (environment :initarg :environment)     ; :accessor method-environment
      (generic-function :initform nil)        ; :accessor method-generic-function
      (function))))                           ; :accessor method-function
+
 
 
 (defvar *the-class-standard-method*)    ;standard-method's class metaobject
@@ -811,10 +822,10 @@
 
 
 ;;; method-environment
-(defun method-environment (method) (slot-value method 'environment))
+#+nil (defun method-environment (method) (slot-value method 'environment))
 
-(defun* (setf method-environment) (method new-value)
-    (setf (slot-value method 'environment) new-value))
+#+nil (defun* (setf method-environment) (method new-value)
+          (setf (slot-value method 'environment) new-value))
 
 
 ;;; method-generic-function
@@ -938,6 +949,17 @@
 
 
 ;;; defmethod
+#+nil (defmacro defmethod (&rest args)
+          (multiple-value-bind (function-name qualifiers lambda-list specializers body)
+              (parse-defmethod args)
+              `(prog1 ',function-name
+                   (ensure-method (find-generic-function ',function-name)
+                                  :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
+                                  :qualifiers ,(canonicalize-defgeneric-ll qualifiers)
+                                  :specializers ,(canonicalize-specializers specializers)
+                                  :body ',body
+                                  :environment (top-level-environment)))))
+
 (defmacro defmethod (&rest args)
     (multiple-value-bind (function-name qualifiers lambda-list specializers body)
         (parse-defmethod args)
@@ -946,8 +968,8 @@
                             :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
                             :qualifiers ,(canonicalize-defgeneric-ll qualifiers)
                             :specializers ,(canonicalize-specializers specializers)
-                            :body ',body
-                            :environment (top-level-environment)))))
+                            :body ',body))))
+
 
 (defun canonicalize-specializers (specializers)
     (if specializers
@@ -1088,20 +1110,37 @@
 ;;; make-instance-standard-method creates and initializes an instance of
 ;;; standard-method without falling into method lookup.  However, it cannot
 ;;; be called until standard-method exists.
+
+#+nil (defun make-instance-standard-method (method-class
+                                            &key lambda-list qualifiers
+                                              specializers body environment)
+          (declare (ignore method-class))
+          (let ((method (std-allocate-instance *the-class-standard-method*)))
+              (setf (method-lambda-list method) lambda-list)
+              (setf (method-qualifiers method) qualifiers)
+              (setf (method-specializers method) specializers)
+              (setf (method-body method) body)
+              (setf (method-environment method) environment)
+              (setf (method-generic-function method) nil)
+              (setf (method-function method)
+                    (std-compute-method-function method))
+              method))
+
 (defun make-instance-standard-method (method-class
                                       &key lambda-list qualifiers
-                                        specializers body environment)
+                                        specializers body)
     (declare (ignore method-class))
     (let ((method (std-allocate-instance *the-class-standard-method*)))
         (setf (method-lambda-list method) lambda-list)
         (setf (method-qualifiers method) qualifiers)
         (setf (method-specializers method) specializers)
         (setf (method-body method) body)
-        (setf (method-environment method) environment)
         (setf (method-generic-function method) nil)
         (setf (method-function method)
               (std-compute-method-function method))
         method))
+
+
 
 ;;; add-method
 ;;; N.B. This version first removes any existing method on the generic function
@@ -1148,8 +1187,7 @@
      :lambda-list '(object)
      :qualifiers ()
      :specializers (list class)
-     :body `(slot-value object ',slot-name)
-     :environment (top-level-environment))
+     :body `(slot-value object ',slot-name))
     (values))
 
 
@@ -1161,11 +1199,11 @@
      ;;:specializers (list (find-class 't) class)
      ;; MB (class t) !!
      :specializers (list class (find-class 't))
-     :body `(setf (slot-value object ',slot-name) new-value)
-     :environment (top-level-environment))
+     :body `(setf (slot-value object ',slot-name) new-value))
     (values))
 
 
+;;;`(slot-value object ',slot-name)
 
 ;;;
 ;;; Generic function invocation
@@ -1290,12 +1328,28 @@
                   (method-generic-function method) next-methods))))
 
 ;;; :todo: compile-in-lexical-environment
+#+nil (defun std-compute-method-function (method)
+          (let ((form (method-body method))
+                (lambda-list (method-lambda-list method))
+                (mgf (method-generic-function method)))
+              (compile-in-lexical-environment
+               (method-environment method)
+               `(lambda (args next-emfun)
+                    (flet ((call-next-method (&rest cnm-args)
+                               (if (null next-emfun)
+                                   (error "No next method for the generic function ~S." ,mgf)
+                                   (funcall next-emfun (or cnm-args args))))
+                           (next-method-p ()
+                               (not (null next-emfun))))
+                        (apply #'(lambda ,(kludge-arglist lambda-list)
+                                     ,form)
+                               args))))))
+
 (defun std-compute-method-function (method)
     (let ((form (method-body method))
           (lambda-list (method-lambda-list method))
           (mgf (method-generic-function method)))
         (compile-in-lexical-environment
-         (method-environment method)
          `(lambda (args next-emfun)
               (flet ((call-next-method (&rest cnm-args)
                          (if (null next-emfun)
@@ -1306,6 +1360,7 @@
                   (apply #'(lambda ,(kludge-arglist lambda-list)
                                ,form)
                          args))))))
+
 
 ;;; N.B. The function kludge-arglist is used to pave over the differences
 ;;; between argument keyword compatibility for regular functions versus
@@ -1324,7 +1379,7 @@
     nil) ; Bogus top level lexical environment
 
 ;;; fuck he need?
-(defvar *compile-methods* nil)      ; by default, run everything interpreted
+;;;(defvar *compile-methods* nil)      ; by default, run everything interpreted
 
 ;;; see above
 #+nil (defun compile-in-lexical-environment (env lambda-expr)
@@ -1333,8 +1388,12 @@
               (compile nil lambda-expr)
               (eval `(function ,lambda-expr))))
 
-(defun compile-in-lexical-environment (env lambda-expr)
-    (declare (ignore env))
+#+nil (defun compile-in-lexical-environment (env lambda-expr)
+          (declare (ignore env))
+          (eval `(function ,lambda-expr)))
+
+(defun compile-in-lexical-environment (lambda-expr)
     (eval `(function ,lambda-expr)))
+
 
 ;;; EOF
