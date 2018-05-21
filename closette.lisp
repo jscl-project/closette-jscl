@@ -904,21 +904,21 @@
 ;;; function table.
 
 
-(defun finalize-generic-function (gf)
-    #+nil (let ((fname (generic-function-name gf)))
-              (if (and (consp fname) (equal (car fname) 'setf))
-                  (print (list 'defsetf! fname))))
+#+nil (defun finalize-generic-function (gf)
+          #+nil (let ((fname (generic-function-name gf)))
+                    (if (and (consp fname) (equal (car fname) 'setf))
+                        (print (list 'defsetf! fname))))
 
-    (setf (generic-function-discriminating-function gf)
-          (funcall (if (eq (class-of gf) *the-class-standard-gf*)
-                       #'std-compute-discriminating-function
-                       #'compute-discriminating-function)
-                   gf))
+          (setf (generic-function-discriminating-function gf)
+                (funcall (if (eq (class-of gf) *the-class-standard-gf*)
+                             #'std-compute-discriminating-function
+                             #'compute-discriminating-function)
+                         gf))
 
-    (jscl::fset (generic-function-name gf)
-                (generic-function-discriminating-function gf))
-    (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
-    (values))
+          (jscl::fset (generic-function-name gf)
+                      (generic-function-discriminating-function gf))
+          (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
+          (values))
 
 
 (defun finalize-generic-function (gf)
@@ -929,7 +929,6 @@
                    gf))
     (let* ((fname (generic-function-name gf))
            (sfname (setf-function-symbol fname)))
-        (print (list 'defsetf fname sfname))
         (jscl::fset sfname (generic-function-discriminating-function gf))
         (if (and (consp fname) (equal (car fname) 'setf))
             (make-setf-pair (cadr fname) sfname))
@@ -1171,12 +1170,15 @@
      :environment (top-level-environment))
     (values))
 
+
 (defun add-writer-method (class fn-name slot-name)
     (ensure-method
      (ensure-generic-function  fn-name :lambda-list '(object new-value))
      :lambda-list '(object new-value)
      :qualifiers ()
-     :specializers (list (find-class 't) class)
+     ;;:specializers (list (find-class 't) class)
+     ;; MB (class t) !!
+     :specializers (list class (find-class 't))
      :body `(setf (slot-value object ',slot-name) new-value)
      :environment (top-level-environment))
     (values))
@@ -1343,11 +1345,11 @@
 (defvar *compile-methods* nil)      ; by default, run everything interpreted
 
 ;;; see above
-(defun compile-in-lexical-environment (env lambda-expr)
-    (declare (ignore env))
-    (if *compile-methods*
-        (compile nil lambda-expr)
-        (eval `(function ,lambda-expr))))
+#+nil (defun compile-in-lexical-environment (env lambda-expr)
+          (declare (ignore env))
+          (if *compile-methods*
+              (compile nil lambda-expr)
+              (eval `(function ,lambda-expr))))
 
 (defun compile-in-lexical-environment (env lambda-expr)
     (declare (ignore env))
