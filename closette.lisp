@@ -191,19 +191,19 @@
 
 (defun built-in-class-of (x)
     (typecase x
-      ;;(null                                          (find-class 'null))
+      ;;(null                         (find-class 'null))
       (symbol                       (find-class 'symbol))
-      (integer                                  (find-class 'integer))
-      (float                                   (find-class 'float))
-      (cons                                          (find-class 'cons))
-      (character                                     (find-class 'character))
-      (package                                       (find-class 'package))
-      (string                                    (find-class 'string))
-      (vector  (find-class 'vector))
-      (array                (find-class 'array))
-      (sequence         (find-class 'sequence))
-      (function                                      (find-class 'function))
-      (t                                             (find-class 't))))
+      (integer                      (find-class 'integer))
+      (float                        (find-class 'float))
+      (cons                         (find-class 'cons))
+      (character                    (find-class 'character))
+      (package                      (find-class 'package))
+      (string                       (find-class 'string))
+      (vector                       (find-class 'vector))
+      (array                        (find-class 'array))
+      (sequence                     (find-class 'sequence))
+      (function                     (find-class 'function))
+      (t                            (find-class 't))))
 
 
 
