@@ -903,24 +903,6 @@
 ;;; and storing the discriminating function, and clearing the effective method
 ;;; function table.
 
-
-#+nil (defun finalize-generic-function (gf)
-          #+nil (let ((fname (generic-function-name gf)))
-                    (if (and (consp fname) (equal (car fname) 'setf))
-                        (print (list 'defsetf! fname))))
-
-          (setf (generic-function-discriminating-function gf)
-                (funcall (if (eq (class-of gf) *the-class-standard-gf*)
-                             #'std-compute-discriminating-function
-                             #'compute-discriminating-function)
-                         gf))
-
-          (jscl::fset (generic-function-name gf)
-                      (generic-function-discriminating-function gf))
-          (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
-          (values))
-
-
 (defun finalize-generic-function (gf)
     (setf (generic-function-discriminating-function gf)
           (funcall (if (eq (class-of gf) *the-class-standard-gf*)
