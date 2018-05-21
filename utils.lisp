@@ -36,6 +36,24 @@
           (t (error "defun* ~a unknow function specifier" name))))
 
 
+;;; kludge for defsetf generic accessor
+(defun make-setf-pair (access-fn update-fn)
+    (PUSH (CONS access-fn
+                (LAMBDA (&REST arguments)
+                    (DESTRUCTURING-BIND (&REST ARGS) arguments
+                        (LET ((G!NEW (GENSYM))
+                              (G!ARGS (MAPCAR (LAMBDA (S)(GENSYM)) ARGS)))
+                            (VALUES
+                             G!ARGS
+                             ARGS
+                             (LIST G!NEW)
+                             (CONS update-fn
+                                   (APPEND G!ARGS (LIST G!NEW)))
+                             (CONS access-fn  G!ARGS))))))
+          JSCL::*SETF-EXPANDERS*)
+    (values))
+
+
 ;;; (setf (cadr lst) something)
 (defun* (setf cadr) (lst value) (rplaca (cdr lst) value))
 

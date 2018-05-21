@@ -921,6 +921,20 @@
     (values))
 
 
+(defun finalize-generic-function (gf)
+    (setf (generic-function-discriminating-function gf)
+          (funcall (if (eq (class-of gf) *the-class-standard-gf*)
+                       #'std-compute-discriminating-function
+                       #'compute-discriminating-function)
+                   gf))
+    (let* ((fname (generic-function-name gf))
+           (sfname (setf-function-symbol fname)))
+        (print (list 'defsetf fname sfname))
+        (jscl::fset sfname (generic-function-discriminating-function gf))
+        (if (and (consp fname) (equal (car fname) 'setf))
+            (make-setf-pair (cadr fname) sfname))
+        (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
+        (values)))
 
 
 ;;; make-instance-standard-generic-function creates and initializes an
@@ -1334,5 +1348,9 @@
     (if *compile-methods*
         (compile nil lambda-expr)
         (eval `(function ,lambda-expr))))
+
+(defun compile-in-lexical-environment (env lambda-expr)
+    (declare (ignore env))
+    (eval `(function ,lambda-expr)))
 
 ;;; EOF
