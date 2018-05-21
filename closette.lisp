@@ -1373,8 +1373,8 @@
             lambda-list)))
 
 ;;; Run-time environment hacking (Common Lisp ain't got 'em).
-(defun top-level-environment ()
-    nil) ; Bogus top level lexical environment
+;;(defun top-level-environment ()
+;;    nil) ; Bogus top level lexical environment
 
 ;;; fuck he need?
 ;;;(defvar *compile-methods* nil)      ; by default, run everything interpreted
