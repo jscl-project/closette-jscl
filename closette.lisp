@@ -1282,13 +1282,11 @@
 (defun around-method-p (method)
     (equal '(:around) (method-qualifiers method)))
 
-;;; :todo: format
 (defun std-compute-effective-method-function (gf methods)
     (let ((primaries (remove-if-not #'primary-method-p methods))
           (around (find-if #'around-method-p methods)))
         (when (null primaries)
-            ;; bug: its bug!!!
-            (error "No primary methods for the generic function ~S." gf))
+            (error "No primary methods for the generic function ~S." (generic-function-name gf)))
         (if around
             (let ((next-emfun
                     (funcall
