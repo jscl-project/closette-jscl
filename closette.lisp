@@ -698,7 +698,7 @@
      (discriminating-function)  ; :accessor generic-function-
                                         ;    -discriminating-function
      (classes-to-emf-table      ; :accessor classes-to-emf-table
-      :initform (make-hash-table :test #'eq)))))
+      :initform (make-hash-table :test #'equal)))))
 
 
 (defvar *the-class-standard-gf*) ;standard-generic-function's class metaobject
