@@ -35,7 +35,7 @@
 
 ;; 3. Install standard-class's (circular) class-of link.
 ;;;(setf (std-instance-class the-class-standard-class) the-class-standard-class)
-(setf (std-instance-class *the-class-standard-class*) (lambda () *the-class-standard-class*))
+(setf (std-instance-class *the-class-standard-class*) *the-class-standard-class*)
 ;; (It's now okay to use class-... accessor).
 
 ;; 4. Fill in standard-class's class-slots.
@@ -64,11 +64,11 @@
 ;; 8. Replace all (3) existing pointers to the skeleton with real one.
 ;; note: lambda !!!
 (setf (std-instance-class (find-class 't))
-      (lambda () *the-class-standard-class*))
+      *the-class-standard-class*)
 (setf (std-instance-class (find-class 'standard-object))
-      (lambda () *the-class-standard-class*))
+      *the-class-standard-class*)
 (setf (std-instance-class *the-class-standard-class*)
-      (lambda () *the-class-standard-class*))
+      *the-class-standard-class*)
 
 
 ;; (Clear sailing from here on in).
