@@ -220,7 +220,7 @@
 ;;;
 
 (defparameter *the-defclass-standard-class*  ;standard-class's defclass form
-  '(defclass standard-class ()
+  '(!defclass standard-class ()
     ((name :initarg :name)              ; :accessor class-name
      (direct-superclasses               ; :accessor class-direct-superclasses
       :initarg :direct-superclasses)
@@ -295,6 +295,14 @@
 
 ;;; defclass
 
+(defmacro !defclass (name direct-superclasses direct-slots &rest options)
+    (ensure-class ',name
+                  :direct-superclasses
+                  ,(canonicalize-direct-superclasses direct-superclasses)
+                  :direct-slots
+                  ,(canonicalize-direct-slots direct-slots)
+                  ,@(canonicalize-defclass-options options)))
+
 (defmacro defclass (name direct-superclasses direct-slots &rest options)
     `(prog1 ',name
          (ensure-class ',name
@@ -303,6 +311,7 @@
                        :direct-slots
                        ,(canonicalize-direct-slots direct-slots)
                        ,@(canonicalize-defclass-options options))))
+
 
 
 (defun canonicalize-direct-superclasses (direct-superclasses)
