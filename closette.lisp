@@ -69,7 +69,7 @@
 ;;; :note: lambda!!!
 (defun std-allocate-instance (class)
     (allocate-std-instance
-     :class (lambda () class)
+     :class class
      :slots (allocate-slot-storage (count-if #'instance-slot-p (class-slots class))
                                    *secret-unbound-value*)))
 
