@@ -296,12 +296,12 @@
 ;;; defclass
 
 (defmacro !defclass (name direct-superclasses direct-slots &rest options)
-    `(ensure-class ',name
-                   :direct-superclasses
-                   ,(canonicalize-direct-superclasses direct-superclasses)
-                   :direct-slots
-                   ,(canonicalize-direct-slots direct-slots)
-                   ,@(canonicalize-defclass-options options)))
+    (ensure-class ',name
+                  :direct-superclasses
+                  ,(canonicalize-direct-superclasses direct-superclasses)
+                  :direct-slots
+                  ,(canonicalize-direct-slots direct-slots)
+                  ,@(canonicalize-defclass-options options)))
 
 (defmacro defclass (name direct-superclasses direct-slots &rest options)
     `(prog1 ',name
