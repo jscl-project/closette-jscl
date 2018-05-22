@@ -432,11 +432,38 @@
                                               :direct-superclasses direct-superclasses)
         class))
 
-(defun std-after-initialization-for-classes
-    (class &key direct-superclasses direct-slots &allow-other-keys)
-    (let ((supers
-            (or direct-superclasses
-                (list (find-class 'standard-object)))))
+#+nil (defun std-after-initialization-for-classes
+          (class &key direct-superclasses direct-slots &allow-other-keys)
+          (let ((supers
+                  (or direct-superclasses
+                      (list (find-class 'standard-object)))))
+              (setf (class-direct-superclasses class) supers)
+              (dolist (superclass supers)
+                  (push class (class-direct-subclasses superclass))))
+          (let ((slots
+                  (mapcar #'(lambda (slot-properties)
+                                (apply #'make-direct-slot-definition slot-properties))
+                          direct-slots)))
+              (setf (class-direct-slots class) slots)
+              (dolist (direct-slot slots)
+                  (dolist (reader (slot-definition-readers direct-slot))
+                      (add-reader-method
+                       class reader (slot-definition-name direct-slot)))
+                  (dolist (writer (slot-definition-writers direct-slot))
+                      (add-writer-method
+                       class writer (slot-definition-name direct-slot)))))
+          (funcall (if (eq (class-of class) *the-class-standard-class*)
+                       #'std-finalize-inheritance
+                       #'finalize-inheritance)
+                   class)
+          (values))
+
+
+(defun std-after-initialization-for-classes (class &rest all-keys)
+    (let ((direct-superclasses (get-keyword-from all-keys :direct-superclasses))
+          (direct-slots (get-keyword-from all-keys :direct-slots))
+          (supers  (or direct-superclasses
+                       (list (find-class 'standard-object)))))
         (setf (class-direct-superclasses class) supers)
         (dolist (superclass supers)
             (push class (class-direct-subclasses superclass))))
@@ -457,6 +484,8 @@
                  #'finalize-inheritance)
              class)
     (values))
+
+
 
 ;;; Slot definition metaobjects
 
