@@ -185,7 +185,7 @@
 ;;; note: lambda!!!
 (defun class-of (x)
     (if (std-instance-p x)
-        (funcall (std-instance-class x))
+        (std-instance-class x)
         (built-in-class-of x)))
 
 
