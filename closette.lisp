@@ -416,10 +416,10 @@
 
 
 (defun key-trace (fn keys)
-    (let ((fname (if (symbolp fn) (symbol-name) fn))
+    (let ((fname (if (symbolp fn) (symbol-name fn) fn))
           (result))
-        (setq result (format nil "~a" (mapcar (lambda (x) (if (symbolp x) (symbol-name x) t)) keys)))
-        (#j:console:log "Keys " fname result)
+        (setq result (mapcar (lambda (x) (if (symbolp x) (symbol-name x) t)) keys))
+        (#j:console:log "Keys " fname (format nil "~a" result))
         (values)))
 
 (defun ensure-class (name &rest all-keys)
@@ -453,8 +453,8 @@
               class))
 
 (defun make-instance-standard-class (metaclass &rest all-keys)
-    (key-trace 'make-instance-standard-class all-keys)
     (declare (ignore metaclass ))
+    (key-trace 'make-instance-standard-class all-keys)
     (let ((name (get-keyword-from all-keys :name))
           (direct-superclasses (get-keyword-from all-keys :direct-superclasses))
           (direct-slots (get-keyword-from all-keys :direct-slots))
@@ -970,6 +970,7 @@
 ;;; ensure-generic-function
 (defun ensure-generic-function (function-name &rest all-keys)
     (if (find-generic-function function-name nil)
+        ;; todo: ???
         (find-generic-function function-name)
         (let*
             ((generic-function-class (get-keyword-from all-keys :generic-function-class *the-class-standard-gf*))
