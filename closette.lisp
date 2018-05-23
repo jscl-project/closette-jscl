@@ -608,17 +608,21 @@
 
 
 ;;; finalize-inheritance
-(defun std-finalize-inheritance (class)
+(defun std-finalize-inheritance (class &rest all-keys)
+    (#j:console:log "std-finilize-inheritance" (class-name class) all-keys)
+    (#j:console:log "std-fin class precedence" )
     (setf (class-precedence-list class)
           (funcall (if (eq (class-of class) *the-class-standard-class*)
                        #'std-compute-class-precedence-list
                        #'compute-class-precedence-list)
                    class))
+    (#j:console:log "std-fin class-slot")
     (setf (class-slots class)
           (funcall (if (eq (class-of class) *the-class-standard-class*)
                        #'std-compute-slots
                        #'compute-slots)
                    class))
+    (#j:console:log "std-fin done")
     (values))
 
 ;;; Class precedence lists
