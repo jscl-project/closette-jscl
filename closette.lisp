@@ -1187,15 +1187,30 @@
 ;;; N.B. This version first removes any existing method on the generic function
 ;;; with the same qualifiers and specializers.  It's a pain to develop
 ;;; programs without this feature of full CLOS.
+
+#+nil (defun add-method (gf method)
+          (#j:console:log "add-method" gf method)
+          (let ((old-method
+                  (find-method gf
+                               (method-qualifiers method)
+                               (method-specializers method)
+                               (method-lambda-list method)
+                               nil) ))
+              (#j:console:log "add-method old-method" old-method)
+              (when old-method (remove-method gf old-method)))
+          (setf (method-generic-function method) gf)
+          (push method (generic-function-methods gf))
+          (dolist (specializer (method-specializers method))
+              (pushnew method (class-direct-methods specializer)))
+          (finalize-generic-function gf)
+          method)
+
 (defun add-method (gf method)
-    (#j:console:log "add-method" gf method)
     (let ((old-method
             (find-method gf
                          (method-qualifiers method)
                          (method-specializers method)
-                         (method-lambda-list method)
                          nil) ))
-        (#j:console:log "add-method old-method" old-method)
         (when old-method (remove-method gf old-method)))
     (setf (method-generic-function method) gf)
     (push method (generic-function-methods gf))
@@ -1211,27 +1226,41 @@
     (dolist (class (method-specializers method))
         (setf (class-direct-methods class)
               (remove method (class-direct-methods class))))
-    (#j:console:log "remove method call finalize" )
     (finalize-generic-function gf)
     method)
 
-(defun find-method (gf qualifiers specializers lambda-list &optional (errorp t))
+#+nil (defun find-method (gf qualifiers specializers lambda-list &optional (errorp t))
+          (let ((method
+                  (find-if #'(lambda (method)
+                                 (#j:console:log (format nil "~a" (generate-defmethod method)))
+                                 (#j:console:log (format nil "~a" (generate-specialized-arglist-1 specializers lambda-list)))
+                                 (#j:console:log "lambda find method" (method-qualifiers method))
+                                 (#j:console:log "lambda find method" (method-specializers method))
+                                 (#j:console:log "lambda 1 eq" (equal qualifiers (method-qualifiers method)))
+                                 (#j:console:log "lambda 2 eq" (equal specializers (method-specializers method)))
+                                 (and (equal qualifiers
+                                             (method-qualifiers method))
+                                      (equal specializers
+                                             (method-specializers method))))
+                           (generic-function-methods gf))))
+              (if (and (null method) errorp)
+                  (error "No such method for ~S." (generic-function-name gf))
+                  method)))
+
+(defun find-method (gf qualifiers specializers &optional (errorp t))
     (let ((method
             (find-if #'(lambda (method)
-                           (#j:console:log (format nil "~a" (generate-defmethod method)))
-                           (#j:console:log (format nil "~a" (generate-specialized-arglist-1 specializers lambda-list)))
-                           (#j:console:log "lambda find method" (method-qualifiers method))
-                           (#j:console:log "lambda find method" (method-specializers method))
-                           (#j:console:log "lambda 1 eq" (eq qualifiers (method-qualifiers method)))
-                           (#j:console:log "lambda 2 eq" (eq specializers (method-specializers method)))
-                           (and (eq qualifiers
-                                    (method-qualifiers method))
-                                (eq specializers
-                                    (method-specializers method))))
+                           (and (equal qualifiers
+                                       (method-qualifiers method))
+                                (equal specializers
+                                       (method-specializers method))))
                      (generic-function-methods gf))))
         (if (and (null method) errorp)
             (error "No such method for ~S." (generic-function-name gf))
             method)))
+
+
+
 
 ;;; Reader and write methods
 (defun add-reader-method (class fn-name slot-name)
