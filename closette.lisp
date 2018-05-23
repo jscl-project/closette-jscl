@@ -966,7 +966,7 @@
         (jscl::fset sfname (generic-function-discriminating-function gf))
         (if (and (consp fname) (equal (car fname) 'setf))
             (make-setf-pair (cadr fname) sfname))
-        (setf (classes-to-emf-table gf) (make-hash-table :test #'equal))
+        (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
         (values)))
 
 
@@ -984,7 +984,7 @@
         (setf (generic-function-lambda-list gf) lambda-list)
         (setf (generic-function-methods gf) ())
         (setf (generic-function-method-class gf) method-class)
-        (setf (classes-to-emf-table gf) (make-hash-table :test #'equal))
+        ;;(setf (classes-to-emf-table gf) (make-hash-table :test #'equal))
         (finalize-generic-function gf)
         gf))
 
