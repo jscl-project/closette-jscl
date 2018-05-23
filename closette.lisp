@@ -966,7 +966,7 @@
         (jscl::fset sfname (generic-function-discriminating-function gf))
         (if (and (consp fname) (equal (car fname) 'setf))
             (make-setf-pair (cadr fname) sfname))
-        (setf (classes-to-emf-table gf) (make-hash-table :test #'eq))
+        (setf (classes-to-emf-table gf) (make-hash-table :test #'equal))
         (values)))
 
 
@@ -984,7 +984,7 @@
         (setf (generic-function-lambda-list gf) lambda-list)
         (setf (generic-function-methods gf) ())
         (setf (generic-function-method-class gf) method-class)
-        ;;(setf (classes-to-emf-table gf) (make-hash-table :test #'equal))
+        (setf (classes-to-emf-table gf) (make-hash-table :test #'equal))
         (finalize-generic-function gf)
         gf))
 
@@ -1188,9 +1188,14 @@
 ;;; with the same qualifiers and specializers.  It's a pain to develop
 ;;; programs without this feature of full CLOS.
 (defun add-method (gf method)
+    (#j:console:log "add-method" gf method)
     (let ((old-method
-            (find-method gf (method-qualifiers method)
-                         (method-specializers method) nil)))
+            (find-method gf
+                         (method-qualifiers method)
+                         (method-specializers method)
+                         (method-lambda-list method)
+                         nil) ))
+        (#j:console:log "add-method old-method" old-method)
         (when old-method (remove-method gf old-method)))
     (setf (method-generic-function method) gf)
     (push method (generic-function-methods gf))
@@ -1206,12 +1211,19 @@
     (dolist (class (method-specializers method))
         (setf (class-direct-methods class)
               (remove method (class-direct-methods class))))
+    (#j:console:log "remove method call finalize" )
     (finalize-generic-function gf)
     method)
 
-(defun find-method (gf qualifiers specializers &optional (errorp t))
+(defun find-method (gf qualifiers specializers lambda-list &optional (errorp t))
     (let ((method
             (find-if #'(lambda (method)
+                           (#j:console:log (format nil "~a" (generate-defmethod method)))
+                           (#j:console:log (format nil "~a" (generate-specialized-arglist-1 specializers lambda-list)))
+                           (#j:console:log "lambda find method" (method-qualifiers method))
+                           (#j:console:log "lambda find method" (method-specializers method))
+                           (#j:console:log "lambda 1 eq" (eq qualifiers (method-qualifiers method)))
+                           (#j:console:log "lambda 2 eq" (eq specializers (method-specializers method)))
                            (and (eq qualifiers
                                     (method-qualifiers method))
                                 (eq specializers

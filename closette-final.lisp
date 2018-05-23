@@ -75,7 +75,6 @@
         (let ((slot-name (slot-definition-name slot)))
             (multiple-value-bind (init-key init-value foundp)
                 (get-properties all-keys (slot-definition-initargs slot))
-                ;;(format t "init: ~a ~a ~%" init-key init-value foundp)
                 (if foundp
                     (setf (slot-value instance slot-name) init-value)
                     (when (and (not (slot-boundp instance slot-name))
