@@ -51,14 +51,17 @@
 
 (defgeneric make-instance (class &key))
 
+(defgeneric make-instance (class &rest))
+
+
 (defmethod make-instance ((class standard-class) &rest initargs)
-    (#j:console:log "make-instance-class" initargs)
+    ;;(#j:console:log "make-instance-class" initargs)
     (let ((instance (allocate-instance class)))
         (apply #'initialize-instance instance initargs)
         instance))
 
 (defmethod make-instance ((class symbol) &rest initargs)
-    (#j:console:log "make-instance-symbol" initargs)
+    ;;(#j:console:log "make-instance-symbol" initargs)
     (apply #'make-instance (find-class class) initargs))
 
 (defgeneric initialize-instance (instance &key))
@@ -73,14 +76,14 @@
 
 (defgeneric shared-initialize (instance slot-names &key))
 (defmethod shared-initialize ((instance standard-object) slot-names &rest all-keys)
-    (#j:console:log "share-instance entry" slot-names all-keys)
+    ;;(#j:console:log "share-instance entry" slot-names all-keys)
     (dolist (slot (class-slots (class-of instance)))
-        (#j:console:log "share-instance slot" slot)
+        ;;(#j:console:log "share-instance slot" slot)
         (let ((slot-name (slot-definition-name slot)))
-            (#j:console:log "share-instance slot-name" slot-name)
+            ;;(#j:console:log "share-instance slot-name" slot-name)
             (multiple-value-bind (init-key init-value foundp)
                 (get-properties all-keys (slot-definition-initargs slot))
-                (#j:console:log  "init" init-key init-value foundp)
+                ;;(#j:console:log  "init" init-key init-value foundp)
                 (if foundp
                     (setf (slot-value instance slot-name) init-value)
                     (when (and (not (slot-boundp instance slot-name))
@@ -144,9 +147,10 @@
 
 ;;; Finalize inheritance
 
-(defgeneric finalize-inheritance (class))
-(defmethod finalize-inheritance ((class standard-class))
-    (std-finalize-inheritance class)
+(defgeneric finalize-inheritance (class &rest))
+(defmethod finalize-inheritance ((class standard-class) &rest all-keys)
+    (#j:console:log "finalize inheritance keys" all-keys)
+    (std-finalize-inheritance class all-keys)
     (values))
 
 ;;; Class precedence lists
@@ -177,8 +181,13 @@
                 (generic-function-name gf)))
     gf)
 
-(defmethod initialize-instance :after ((gf standard-generic-function) &key)
+#+nil (defmethod initialize-instance :after ((gf standard-generic-function) &key)
+          (finalize-generic-function gf))
+
+(defmethod initialize-instance :after ((gf standard-generic-function) &rest args)
     (finalize-generic-function gf))
+
+
 
 ;;;
 ;;; Methods having to do with method metaobjects.
