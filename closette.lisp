@@ -1340,8 +1340,8 @@
      (copy-list
       (remove-if-not #'(lambda (method)
                            (every1
-                            #'(lambda (lst)
-                                  (subclassp (first lst) (second lst)))
+                            #'(lambda (c1 c2)
+                                  (subclassp c1 c2))
                             required-classes
                             (method-specializers method)))
                      (generic-function-methods gf)))
