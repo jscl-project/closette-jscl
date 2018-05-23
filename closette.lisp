@@ -970,7 +970,7 @@
 ;;; ensure-generic-function
 (defun ensure-generic-function (function-name &rest all-keys)
     (if (find-generic-function function-name nil)
-        ;; todo: ???
+        ;; todo: ?
         (find-generic-function function-name)
         (let*
             ((generic-function-class (get-keyword-from all-keys :generic-function-class *the-class-standard-gf*))
