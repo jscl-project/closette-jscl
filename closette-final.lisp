@@ -52,11 +52,13 @@
 (defgeneric make-instance (class &key))
 
 (defmethod make-instance ((class standard-class) &rest initargs)
+    (#j:console:log "make-instance-class" initargs)
     (let ((instance (allocate-instance class)))
         (apply #'initialize-instance instance initargs)
         instance))
 
 (defmethod make-instance ((class symbol) &rest initargs)
+    (#j:console:log "make-instance-symbol" initargs)
     (apply #'make-instance (find-class class) initargs))
 
 (defgeneric initialize-instance (instance &key))
@@ -71,10 +73,14 @@
 
 (defgeneric shared-initialize (instance slot-names &key))
 (defmethod shared-initialize ((instance standard-object) slot-names &rest all-keys)
+    (#j:console:log "share-instance entry" slot-names all-keys)
     (dolist (slot (class-slots (class-of instance)))
+        (#j:console:log "share-instance slot" slot)
         (let ((slot-name (slot-definition-name slot)))
+            (#j:console:log "share-instance slot-name" slot-name)
             (multiple-value-bind (init-key init-value foundp)
                 (get-properties all-keys (slot-definition-initargs slot))
+                (#j:console:log  "init" init-key init-value foundp)
                 (if foundp
                     (setf (slot-value instance slot-name) init-value)
                     (when (and (not (slot-boundp instance slot-name))
