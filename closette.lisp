@@ -431,11 +431,25 @@
 ;;; standard-class without falling into method lookup.  However, it cannot be
 ;;; called until standard-class itself exists.
 
-(defun make-instance-standard-class
-    (metaclass &key name direct-superclasses direct-slots
-     &allow-other-keys)
+#+nil (defun make-instance-standard-class
+          (metaclass &key name direct-superclasses direct-slots
+           &allow-other-keys)
+          (declare (ignore metaclass ))
+          (let ((class (std-allocate-instance *the-class-standard-class*)))
+              (setf (class-name class) name)
+              (setf (class-direct-subclasses class) ())
+              (setf (class-direct-methods class) ())
+              (std-after-initialization-for-classes class
+                                                    :direct-slots direct-slots
+                                                    :direct-superclasses direct-superclasses)
+              class))
+
+(defun make-instance-standard-class (metaclass &rest all-keys)
     (declare (ignore metaclass ))
-    (let ((class (std-allocate-instance *the-class-standard-class*)))
+    (let ((name (get-keyword-from all-keys :name))
+          (direct-superclasses (get-keyword-from all-keys :direct-superclasses))
+          (direct-slots (get-keyword-from all-keys :direct-slots))
+          (class (std-allocate-instance *the-class-standard-class*)))
         (setf (class-name class) name)
         (setf (class-direct-subclasses class) ())
         (setf (class-direct-methods class) ())
@@ -443,6 +457,8 @@
                                               :direct-slots direct-slots
                                               :direct-superclasses direct-superclasses)
         class))
+
+
 
 #+nil (defun std-after-initialization-for-classes
           (class &key direct-superclasses direct-slots &allow-other-keys)
