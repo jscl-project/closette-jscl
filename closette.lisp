@@ -1318,15 +1318,32 @@
         (funcall emfun args)))
 
 ;;; compute-applicable-methods-using-classes
+#+nil (defun compute-applicable-methods-using-classes (gf required-classes)
+          (sort
+           (copy-list
+            (remove-if-not #'(lambda (method)
+                                 ;; todo: every1 !!!
+                                 (every
+                                  #'(lambda (lst) (subclassp (first lst) (second lst)))
+                                  (mapcar #'(lambda (x y) (list x y))
+                                          required-classes (method-specializers method))))
+                           (generic-function-methods gf)))
+           #'(lambda (m1 m2)
+                 (funcall
+                  (if (eq (class-of gf) *the-class-standard-gf*)
+                      #'std-method-more-specific-p
+                      #'method-more-specific-p)
+                  gf m1 m2 required-classes))))
+
 (defun compute-applicable-methods-using-classes (gf required-classes)
     (sort
      (copy-list
       (remove-if-not #'(lambda (method)
-                           ;; todo: every1 !!!
-                           (every
-                            #'(lambda (lst) (subclassp (first lst) (second lst)))
-                            (mapcar #'(lambda (x y) (list x y))
-                                    required-classes (method-specializers method))))
+                           (every1
+                            #'(lambda (lst)
+                                  (subclassp (first lst) (second lst)))
+                            required-classes
+                            (method-specializers method)))
                      (generic-function-methods gf)))
      #'(lambda (m1 m2)
            (funcall
@@ -1334,6 +1351,8 @@
                 #'std-method-more-specific-p
                 #'method-more-specific-p)
             gf m1 m2 required-classes))))
+
+
 
 
 (defun std-method-more-specific-p (gf method1 method2 required-classes)
@@ -1473,6 +1492,7 @@
           (eval `(function ,lambda-expr)))
 
 (defun compile-in-lexical-environment (lambda-expr)
+    ;;(print lambda-expr)
     (eval `(function ,lambda-expr)))
 
 
