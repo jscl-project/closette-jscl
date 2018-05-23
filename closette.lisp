@@ -296,21 +296,22 @@
 ;;; defclass
 
 (defmacro !defclass (name direct-superclasses direct-slots &rest options)
-    (ensure-class ',name
-                  :direct-superclasses
-                  ,(canonicalize-direct-superclasses direct-superclasses)
-                  :direct-slots
-                  ,(canonicalize-direct-slots direct-slots)
-                  ,@(canonicalize-defclass-options options)))
+    `(ensure-class ',name
+                   :direct-superclasses
+                   ,(canonicalize-direct-superclasses direct-superclasses)
+                   :direct-slots
+                   ,(canonicalize-direct-slots direct-slots)
+                   ,@(canonicalize-defclass-options options)))
 
 (defmacro defclass (name direct-superclasses direct-slots &rest options)
-    `(prog1 ',name
+    `(progn
          (ensure-class ',name
                        :direct-superclasses
                        ,(canonicalize-direct-superclasses direct-superclasses)
                        :direct-slots
                        ,(canonicalize-direct-slots direct-slots)
-                       ,@(canonicalize-defclass-options options))))
+                       ,@(canonicalize-defclass-options options))
+         ',name))
 
 
 
@@ -728,7 +729,7 @@
 ;;;
 
 (defparameter *the-defclass-standard-generic-function*
-  '(defclass standard-generic-function ()
+  '(!defclass standard-generic-function ()
     ((name :initarg :name)      ; :accessor generic-function-name
      (lambda-list               ; :accessor generic-function-lambda-list
       :initarg :lambda-list)
@@ -815,7 +816,7 @@
 
 
 (defparameter *the-defclass-standard-method*
-  '(defclass standard-method ()
+  '(!defclass standard-method ()
     ((lambda-list :initarg :lambda-list)     ; :accessor method-lambda-list
      (qualifiers :initarg :qualifiers)       ; :accessor method-qualifiers
      (specializers :initarg :specializers)   ; :accessor method-specializers
