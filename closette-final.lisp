@@ -49,9 +49,9 @@
 (defmethod allocate-instance ((class standard-class))
     (std-allocate-instance class))
 
-;;;(defgeneric make-instance (class &key))
+(defgeneric make-instance (class &key))
 
-(defgeneric make-instance (class &rest))
+;;;(defgeneric make-instance (class &rest))
 
 
 (defmethod make-instance ((class standard-class) &rest initargs)
