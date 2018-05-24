@@ -84,11 +84,20 @@
             (class-name (class-of (class-of place))) ))
 
 ;;; keywords trace
+(defun class-name-trace (place)
+    (cond ((std-instance-p place)
+           (print-object-class-name place))
+          ((or (symbolp place)
+               (numberp place))
+           place)
+          (t '@)))
+
+
 (defun key-trace (fn keys)
     (when *logtrace
         (let ((fname (if (symbolp fn) (symbol-name fn) fn))
               (result))
-            (setq result (mapcar (lambda (x) (if (symbolp x) (symbol-name x) t)) keys))
+            (setq result (mapcar (lambda (x) (if (symbolp x) (symbol-name x) (class-name-trace x))) keys))
             (#j:console:log "Keys " fname (format nil "~a" result))))
     (values))
 
