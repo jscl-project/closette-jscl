@@ -94,7 +94,7 @@
 
 
 (defun key-trace (fn keys)
-    (when *logtrace
+    (when *logtrace*
         (let ((fname (if (symbolp fn) (symbol-name fn) fn))
               (result))
             (setq result (mapcar (lambda (x) (if (symbolp x) (symbol-name x) (class-name-trace x))) keys))
