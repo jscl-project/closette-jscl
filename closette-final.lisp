@@ -49,19 +49,18 @@
 (defmethod allocate-instance ((class standard-class))
     (std-allocate-instance class))
 
-(defgeneric make-instance (class &key))
+;;;(defgeneric make-instance (class &key))
 
 (defgeneric make-instance (class &rest))
 
 
 (defmethod make-instance ((class standard-class) &rest initargs)
-    ;;(#j:console:log "make-instance-class" initargs)
+    (#j:console:log "make-instance-class" (format nil "~a" (class-name class)) initargs)
     (let ((instance (allocate-instance class)))
         (apply #'initialize-instance instance initargs)
         instance))
 
 (defmethod make-instance ((class symbol) &rest initargs)
-    ;;(#j:console:log "make-instance-symbol" initargs)
     (apply #'make-instance (find-class class) initargs))
 
 (defgeneric initialize-instance (instance &key))
