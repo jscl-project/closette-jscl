@@ -17,6 +17,73 @@
 
 (in-package :closette)
 
+
+(defvar *logtrace* nil)
+
+(defun logtrace (&optional mode)
+    (if mode
+        (if (eq mode 'on) (setq *logtrace* t)
+            (if (eq mode 'off) (setq *logtrace* nil) 'unknow-trace-mode))
+        *logtrace*))
+
+
+(defun log-trace (note class)
+    (when *logtrace*
+        (#j:console:log
+         (if (symbolp note) (symbol-name note))
+         (print-object*  class)))
+    (values))
+
+
+(defun print-obj* (head things)
+    (princ '<)
+    (princ head)
+    (princ " ")
+    (dolist (it things)
+        (princ it)
+        (princ " "))
+    (princ '>)
+    (terpri))
+
+
+(defun print-object* (std &optional stream)
+    (cond ((std-instance-p std)
+           (let* ((class (std-instance-class std))
+                  (slots (std-instance-slots std))
+                  (str-class (print-object-class-name std))
+                  (str-slots (print-object-slots slots)))
+               (if stream
+                   (progn
+                       (print-obj* str-class str-slots)
+                       (values))
+                   (format nil "~a ~a" str-class str-slots))))))
+
+(defun print-object-slots (slot)
+    (unless (arrayp slot)
+        (error "its not slot"))
+    (let* ((size (length slot))
+           (place)
+           (result))
+        (dotimes (idx size)
+            (setq place (aref slot idx))
+            (cond ((std-instance-p place)
+                   (push (print-object-class-name place) result))
+                  ((consp place)
+                   (push "(..)" result))
+                  ((arrayp place)
+                   (push "#(..)" result))
+                  ((or (numberp place)
+                       (stringp place)
+                       (symbolp place))
+                   (push place result))
+                  (t push '@ result)))
+        (reverse result)))
+
+(defun print-object-class-name (place)
+    (format nil "{~a ~a}" (class-name (class-of place))
+            (class-name (class-of (class-of place))) ))
+
+
 ;;; kludge for (defun (setf name) ...) syntax
 (defun setf-function-symbol (spec)
     (if (consp spec)
