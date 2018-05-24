@@ -182,7 +182,6 @@
 
 ;;; class-of
 
-;;; note: lambda!!!
 (defun class-of (x)
     (if (std-instance-p x)
         (std-instance-class x)
@@ -410,17 +409,17 @@
 ;;; Ensure class
 
 ;;;
-(defun get-keyword-from (args key &optional default)
-    (let ((val (getf args key)))
-        (if val val default)))
+#+nil (defun get-keyword-from (args key &optional default)
+          (let ((val (getf args key)))
+              (if val val default)))
 
 
-(defun key-trace (fn keys)
-    (let ((fname (if (symbolp fn) (symbol-name fn) fn))
-          (result))
-        (setq result (mapcar (lambda (x) (if (symbolp x) (symbol-name x) t)) keys))
-        (#j:console:log "Keys " fname (format nil "~a" result))
-        (values)))
+#+nil (defun key-trace (fn keys)
+          (let ((fname (if (symbolp fn) (symbol-name fn) fn))
+                (result))
+              (setq result (mapcar (lambda (x) (if (symbolp x) (symbol-name x) t)) keys))
+              (#j:console:log "Keys " fname (format nil "~a" result))
+              (values)))
 
 (defun ensure-class (name &rest all-keys)
     ;;(key-trace 'ensure-class all-keys)

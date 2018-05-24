@@ -83,6 +83,16 @@
     (format nil "{~a ~a}" (class-name (class-of place))
             (class-name (class-of (class-of place))) ))
 
+;;; keywords trace
+(defun key-trace (fn keys)
+    (when *logtrace
+        (let ((fname (if (symbolp fn) (symbol-name fn) fn))
+              (result))
+            (setq result (mapcar (lambda (x) (if (symbolp x) (symbol-name x) t)) keys))
+            (#j:console:log "Keys " fname (format nil "~a" result))))
+    (values))
+
+
 
 ;;; kludge for (defun (setf name) ...) syntax
 (defun setf-function-symbol (spec)
@@ -165,6 +175,11 @@
          nil))
 
 ;;;
+
+(defun get-keyword-from (args key &optional default)
+    (let ((val (getf args key)))
+        (if val val default)))
+
 (defun get-properties (plist indicator)
     (do ((it  plist (cddr it)))
         ((null it)
