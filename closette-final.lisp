@@ -96,7 +96,7 @@
 
 ;;; change-class
 
-;;; bug: rotatef not release
+
 (defgeneric change-class (instance new-class &key))
 (defmethod change-class
     ((old-instance standard-object)
@@ -149,20 +149,23 @@
 
 (defgeneric finalize-inheritance (class &rest))
 (defmethod finalize-inheritance ((class standard-class) &rest all-keys)
-    (#j:console:log "finalize inheritance keys" all-keys)
+    ;;(#j:console:log "finalize inheritance keys" all-keys)
     (std-finalize-inheritance class all-keys)
+    ;;(#j:console:log "finalize inheritance done")
     (values))
 
 ;;; Class precedence lists
 
 (defgeneric compute-class-precedence-list (class))
 (defmethod compute-class-precedence-list ((class standard-class))
+    ;;(#j:console:log "compute CPL")
     (std-compute-class-precedence-list class))
 
 ;;; Slot inheritance
 
 (defgeneric compute-slots (class))
 (defmethod compute-slots ((class standard-class))
+    ;;(#j:console:log "compute slots")
     (std-compute-slots class))
 
 (defgeneric compute-effective-slot-definition (class direct-slots))
@@ -184,6 +187,7 @@
 #+nil (defmethod initialize-instance :after ((gf standard-generic-function) &key)
           (finalize-generic-function gf))
 
+;;; mvk change &key to &rest args
 (defmethod initialize-instance :after ((gf standard-generic-function) &rest args)
     (finalize-generic-function gf))
 
@@ -204,7 +208,8 @@
                         (method-specializers method))))
     method)
 
-(defmethod initialize-instance :after ((method standard-method) &key)
+;;; mvk add &rest
+(defmethod initialize-instance :after ((method standard-method) &rest args)
     (setf (method-function method) (compute-method-function method)))
 
 ;;;

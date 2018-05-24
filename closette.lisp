@@ -423,7 +423,7 @@
         (values)))
 
 (defun ensure-class (name &rest all-keys)
-    (key-trace 'ensure-class all-keys)
+    ;;(key-trace 'ensure-class all-keys)
     (if (find-class name nil)
         (error "Can't redefine the class named ~S." name)
         (let* ((metaclass (get-keyword-from all-keys :metaclass *the-class-standard-class*))
@@ -454,7 +454,7 @@
 
 (defun make-instance-standard-class (metaclass &rest all-keys)
     (declare (ignore metaclass ))
-    (key-trace 'make-instance-standard-class all-keys)
+    ;;(key-trace 'make-instance-standard-class all-keys)
     (let ((name (get-keyword-from all-keys :name))
           (direct-superclasses (get-keyword-from all-keys :direct-superclasses))
           (direct-slots (get-keyword-from all-keys :direct-slots))
@@ -497,7 +497,7 @@
 
 
 (defun std-after-initialization-for-classes (class &rest all-keys)
-    (key-trace 'std-after-initialization-for-classes all-keys)
+    ;;(key-trace 'std-after-initialization-for-classes all-keys)
     (let* ((direct-superclasses (get-keyword-from all-keys :direct-superclasses))
            (direct-slots (get-keyword-from all-keys :direct-slots))
            (supers  (or direct-superclasses
@@ -535,7 +535,7 @@
      &key name (initargs ()) (initform nil) (initfunction nil)
        (readers ()) (writers ()) (allocation :instance)
      &allow-other-keys)
-    (key-trace 'make-direct-slot-definition properties)
+    ;;(key-trace 'make-direct-slot-definition properties)
     (let ((slot (copy-list properties))) ; Don't want to side effect &rest list
         (setf (getf* slot ':name) name)
         (setf (getf* slot ':initargs) initargs)
@@ -551,7 +551,7 @@
      &key name (initargs ()) (initform nil) (initfunction nil)
        (allocation :instance)
      &allow-other-keys)
-    (key-trace 'make-effective-slot-definition properties)
+    ;;(key-trace 'make-effective-slot-definition properties)
     (let ((slot (copy-list properties)))  ; Don't want to side effect &rest list
         (setf (getf* slot ':name) name)
         (setf (getf* slot ':initargs) initargs)
@@ -621,27 +621,27 @@
 
 ;;; finalize-inheritance
 (defun std-finalize-inheritance (class &rest all-keys)
-    (key-trace 'std-finalize-inheritance properties)
-    (#j:console:log "std-finilize-inheritance")
-    (#j:console:log "std-finilize-inheritance"  class)
-    (#j:console:log "std-fin class precedence" )
+    ;;(key-trace 'std-finalize-inheritance properties)
+    ;;(#j:console:log "std-finilize-inheritance")
+    ;;(#j:console:log "std-finilize-inheritance"  class)
+    ;;(#j:console:log "std-fin class precedence" )
     (setf (class-precedence-list class)
           (funcall (if (eq (class-of class) *the-class-standard-class*)
                        #'std-compute-class-precedence-list
                        #'compute-class-precedence-list)
                    class))
-    (#j:console:log "std-fin class-slot")
+    ;;(#j:console:log "std-fin class-slot")
     (setf (class-slots class)
           (funcall (if (eq (class-of class) *the-class-standard-class*)
                        #'std-compute-slots
                        #'compute-slots)
                    class))
-    (#j:console:log "std-fin done")
+    ;;(#j:console:log "std-fin done")
     (values))
 
 ;;; Class precedence lists
 (defun std-compute-class-precedence-list (class)
-    (#j:console:log "std-compute-CPL")
+    ;;(#j:console:log "std-compute-CPL")
     (let ((classes-to-order (collect-superclasses* class)))
         (topological-sort classes-to-order
                           (remove-duplicates
@@ -1012,7 +1012,7 @@
 
 (defun make-instance-standard-generic-function (generic-function-class &rest all-keys)
     (declare (ignore generic-function-class))
-    (key-trace 'make-instance-standard-generic-function all-keys)
+    ;;(key-trace 'make-instance-standard-generic-function all-keys)
     (let ((name (get-keyword-from all-keys :name))
           (lambda-list (get-keyword-from all-keys :lambda-list))
           (method-class (get-keyword-from all-keys :method-class))
