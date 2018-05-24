@@ -422,7 +422,7 @@
               (values)))
 
 (defun ensure-class (name &rest all-keys)
-    ;;(key-trace 'ensure-class all-keys)
+    (key-trace 'ensure-class all-keys)
     (if (find-class name nil)
         (error "Can't redefine the class named ~S." name)
         (let* ((metaclass (get-keyword-from all-keys :metaclass *the-class-standard-class*))
@@ -431,6 +431,8 @@
                                  'make-instance)
                              metaclass :name name all-keys)))
             (setf (find-class name) class)
+            (log-trace 'ensure-class-class class)
+            (log-trace 'ensure-class-metaclass metaclass)
             class)))
 
 
@@ -453,7 +455,8 @@
 
 (defun make-instance-standard-class (metaclass &rest all-keys)
     (declare (ignore metaclass ))
-    ;;(key-trace 'make-instance-standard-class all-keys)
+    (key-trace 'make-instance-standard-class all-keys)
+    (log-trace 'make-instance-standard-class metaclass)
     (let ((name (get-keyword-from all-keys :name))
           (direct-superclasses (get-keyword-from all-keys :direct-superclasses))
           (direct-slots (get-keyword-from all-keys :direct-slots))
@@ -464,6 +467,8 @@
         (std-after-initialization-for-classes class
                                               :direct-slots direct-slots
                                               :direct-superclasses direct-superclasses)
+
+        (log-trace 'make-instance-standard-return-class class)
         class))
 
 
@@ -496,7 +501,8 @@
 
 
 (defun std-after-initialization-for-classes (class &rest all-keys)
-    ;;(key-trace 'std-after-initialization-for-classes all-keys)
+    (key-trace 'std-after-initialization-for-classes all-keys)
+    (log-trace 'std-after-initialization-for-classes class)
     (let* ((direct-superclasses (get-keyword-from all-keys :direct-superclasses))
            (direct-slots (get-keyword-from all-keys :direct-slots))
            (supers  (or direct-superclasses
