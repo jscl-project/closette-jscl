@@ -1,6 +1,6 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(in-package #:closette)
+(in-package #:clos)
 
 
 (defgeneric print-object (instance stream))
@@ -75,14 +75,10 @@
 
 (defgeneric shared-initialize (instance slot-names &key))
 (defmethod shared-initialize ((instance standard-object) slot-names &rest all-keys)
-    ;;(#j:console:log "share-instance entry" slot-names all-keys)
     (dolist (slot (class-slots (class-of instance)))
-        ;;(#j:console:log "share-instance slot" slot)
         (let ((slot-name (slot-definition-name slot)))
-            ;;(#j:console:log "share-instance slot-name" slot-name)
             (multiple-value-bind (init-key init-value foundp)
                 (get-properties all-keys (slot-definition-initargs slot))
-                ;;(#j:console:log  "init" init-key init-value foundp)
                 (if foundp
                     (setf (slot-value instance slot-name) init-value)
                     (when (and (not (slot-boundp instance slot-name))
@@ -94,8 +90,6 @@
     instance)
 
 ;;; change-class
-
-
 (defgeneric change-class (instance new-class &key))
 (defmethod change-class
     ((old-instance standard-object)
@@ -148,23 +142,19 @@
 
 (defgeneric finalize-inheritance (class &rest))
 (defmethod finalize-inheritance ((class standard-class) &rest all-keys)
-    ;;(#j:console:log "finalize inheritance keys" all-keys)
     (std-finalize-inheritance class all-keys)
-    ;;(#j:console:log "finalize inheritance done")
     (values))
 
 ;;; Class precedence lists
 
 (defgeneric compute-class-precedence-list (class))
 (defmethod compute-class-precedence-list ((class standard-class))
-    ;;(#j:console:log "compute CPL")
     (std-compute-class-precedence-list class))
 
 ;;; Slot inheritance
 
 (defgeneric compute-slots (class))
 (defmethod compute-slots ((class standard-class))
-    ;;(#j:console:log "compute slots")
     (std-compute-slots class))
 
 (defgeneric compute-effective-slot-definition (class direct-slots))
