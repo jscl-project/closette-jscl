@@ -19,14 +19,24 @@
 
 
 (defvar *logtrace* nil)
-
-(defun logtrace (&optional mode)
-    (if mode
-        (if (eq mode 'on) (setq *logtrace* t)
-            (if (eq mode 'off) (setq *logtrace* nil) 'unknow-trace-mode))
-        *logtrace*))
+(defvar *keytrace* nil)
 
 
+;;; switch on/off trace
+(export '(logtrace))
+(defun logtrace (&key (log nil) (key nil))
+    (if log
+        (if (eq log :on)
+            (setq *logtrace* t)
+            (setq *logtrace nil)))
+    (if key
+        (if (eq key :on)
+            (setq *keytrace* t)
+            (setq *keytrace nil))
+        (some #'identity (list log key))))
+
+;;; trace note class
+(export '(log-trace))
 (defun log-trace (note class)
     (when *logtrace*
         (#j:console:log
@@ -34,7 +44,7 @@
          (print-object*  class)))
     (values))
 
-
+;;; print unreadable
 (defun print-obj* (head things)
     (princ '<)
     (princ head)
@@ -46,7 +56,8 @@
     (terpri))
 
 
-(defun print-object* (std &optional stream)
+;;;
+(defun print-object* (std &key stream)
     (cond ((std-instance-p std)
            (let* ((class (std-instance-class std))
                   (slots (std-instance-slots std))
@@ -56,7 +67,13 @@
                    (progn
                        (print-obj* str-class str-slots)
                        (values))
-                   (format nil "~a ~a" str-class str-slots))))))
+                   (format nil "~a ~a" str-class str-slots))))
+          (t (if stream
+                 (progn
+                     (print std) (values))
+                 (format nil "~a" std)
+                 )) ))
+
 
 (defun print-object-slots (slot)
     (unless (arrayp slot)
@@ -83,7 +100,7 @@
     (format nil "{~a ~a}" (class-name (class-of place))
             (class-name (class-of (class-of place))) ))
 
-;;; keywords trace
+;;; function keywords trace
 (defun class-name-trace (place)
     (cond ((std-instance-p place)
            (print-object-class-name place))
@@ -92,9 +109,9 @@
            place)
           (t '@)))
 
-
+(export '(key-trace))
 (defun key-trace (fn keys)
-    (when *logtrace*
+    (when *keytrace*
         (let ((fname (if (symbolp fn) (symbol-name fn) fn))
               (result))
             (setq result (mapcar (lambda (x) (if (symbolp x) (symbol-name x) (class-name-trace x))) keys))
