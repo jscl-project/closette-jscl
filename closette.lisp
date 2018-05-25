@@ -409,17 +409,6 @@
 ;;; Ensure class
 
 ;;;
-#+nil (defun get-keyword-from (args key &optional default)
-          (let ((val (getf args key)))
-              (if val val default)))
-
-
-#+nil (defun key-trace (fn keys)
-          (let ((fname (if (symbolp fn) (symbol-name fn) fn))
-                (result))
-              (setq result (mapcar (lambda (x) (if (symbolp x) (symbol-name x) t)) keys))
-              (#j:console:log "Keys " fname (format nil "~a" result))
-              (values)))
 
 (defun ensure-class (name &rest all-keys)
     (key-trace 'ensure-class all-keys)
@@ -440,18 +429,6 @@
 ;;; standard-class without falling into method lookup.  However, it cannot be
 ;;; called until standard-class itself exists.
 
-#+nil (defun make-instance-standard-class
-          (metaclass &key name direct-superclasses direct-slots
-           &allow-other-keys)
-          (declare (ignore metaclass ))
-          (let ((class (std-allocate-instance *the-class-standard-class*)))
-              (setf (class-name class) name)
-              (setf (class-direct-subclasses class) ())
-              (setf (class-direct-methods class) ())
-              (std-after-initialization-for-classes class
-                                                    :direct-slots direct-slots
-                                                    :direct-superclasses direct-superclasses)
-              class))
 
 (defun make-instance-standard-class (metaclass &rest all-keys)
     (declare (ignore metaclass ))
@@ -470,35 +447,6 @@
 
         (log-trace 'make-instance-standard-return-class class)
         class))
-
-
-
-#+nil (defun std-after-initialization-for-classes
-          (class &key direct-superclasses direct-slots &allow-other-keys)
-          (let ((supers
-                  (or direct-superclasses
-                      (list (find-class 'standard-object)))))
-              (setf (class-direct-superclasses class) supers)
-              (dolist (superclass supers)
-                  (push class (class-direct-subclasses superclass))))
-          (let ((slots
-                  (mapcar #'(lambda (slot-properties)
-                                (apply #'make-direct-slot-definition slot-properties))
-                          direct-slots)))
-              (setf (class-direct-slots class) slots)
-              (dolist (direct-slot slots)
-                  (dolist (reader (slot-definition-readers direct-slot))
-                      (add-reader-method
-                       class reader (slot-definition-name direct-slot)))
-                  (dolist (writer (slot-definition-writers direct-slot))
-                      (add-writer-method
-                       class writer (slot-definition-name direct-slot)))))
-          (funcall (if (eq (class-of class) *the-class-standard-class*)
-                       #'std-finalize-inheritance
-                       #'finalize-inheritance)
-                   class)
-          (values))
-
 
 (defun std-after-initialization-for-classes (class &rest all-keys)
     (key-trace 'std-after-initialization-for-classes all-keys)
@@ -626,27 +574,20 @@
 
 ;;; finalize-inheritance
 (defun std-finalize-inheritance (class &rest all-keys)
-    ;;(key-trace 'std-finalize-inheritance properties)
-    ;;(#j:console:log "std-finilize-inheritance")
-    ;;(#j:console:log "std-finilize-inheritance"  class)
-    ;;(#j:console:log "std-fin class precedence" )
     (setf (class-precedence-list class)
           (funcall (if (eq (class-of class) *the-class-standard-class*)
                        #'std-compute-class-precedence-list
                        #'compute-class-precedence-list)
                    class))
-    ;;(#j:console:log "std-fin class-slot")
     (setf (class-slots class)
           (funcall (if (eq (class-of class) *the-class-standard-class*)
                        #'std-compute-slots
                        #'compute-slots)
                    class))
-    ;;(#j:console:log "std-fin done")
     (values))
 
 ;;; Class precedence lists
 (defun std-compute-class-precedence-list (class)
-    ;;(#j:console:log "std-compute-CPL")
     (let ((classes-to-order (collect-superclasses* class)))
         (topological-sort classes-to-order
                           (remove-duplicates
@@ -794,7 +735,6 @@
 
 
 
-
 ;;; generic-function-lambda-list
 (defun generic-function-lambda-list (gf)
     (slot-value gf 'lambda-list))
@@ -844,17 +784,6 @@
 ;;; Method metaobjects and standard-method
 ;;;
 
-#+nil (defparameter *the-defclass-standard-method*
-        '(defclass standard-method ()
-          ((lambda-list :initarg :lambda-list)     ; :accessor method-lambda-list
-           (qualifiers :initarg :qualifiers)       ; :accessor method-qualifiers
-           (specializers :initarg :specializers)   ; :accessor method-specializers
-           (body :initarg :body)                   ; :accessor method-body
-           (environment :initarg :environment)     ; :accessor method-environment
-           (generic-function :initform nil)        ; :accessor method-generic-function
-           (function))))                           ; :accessor method-function
-
-
 (defparameter *the-defclass-standard-method*
   '(!defclass standard-method ()
     ((lambda-list :initarg :lambda-list)     ; :accessor method-lambda-list
@@ -899,23 +828,12 @@
 (defun* (setf method-body) (method new-value)
     (setf (slot-value method 'body) new-value))
 
-
-
-
-;;; method-environment
-#+nil (defun method-environment (method) (slot-value method 'environment))
-
-#+nil (defun* (setf method-environment) (method new-value)
-          (setf (slot-value method 'environment) new-value))
-
-
 ;;; method-generic-function
 (defun method-generic-function (method)
     (slot-value method 'generic-function))
 
 (defun* (setf method-generic-function) (method new-value)
     (setf (slot-value method 'generic-function) new-value))
-
 
 
 ;;; method-function
@@ -1030,18 +948,6 @@
         (finalize-generic-function gf)
         gf))
 
-
-;;; defmethod
-#+nil (defmacro defmethod (&rest args)
-          (multiple-value-bind (function-name qualifiers lambda-list specializers body)
-              (parse-defmethod args)
-              `(prog1 ',function-name
-                   (ensure-method (find-generic-function ',function-name)
-                                  :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
-                                  :qualifiers ,(canonicalize-defgeneric-ll qualifiers)
-                                  :specializers ,(canonicalize-specializers specializers)
-                                  :body ',body
-                                  :environment (top-level-environment)))))
 
 (defmacro defmethod (&rest args)
     (multiple-value-bind (function-name qualifiers lambda-list specializers body)
@@ -1194,21 +1100,6 @@
 ;;; standard-method without falling into method lookup.  However, it cannot
 ;;; be called until standard-method exists.
 
-#+nil (defun make-instance-standard-method (method-class
-                                            &key lambda-list qualifiers
-                                              specializers body environment)
-          (declare (ignore method-class))
-          (let ((method (std-allocate-instance *the-class-standard-method*)))
-              (setf (method-lambda-list method) lambda-list)
-              (setf (method-qualifiers method) qualifiers)
-              (setf (method-specializers method) specializers)
-              (setf (method-body method) body)
-              (setf (method-environment method) environment)
-              (setf (method-generic-function method) nil)
-              (setf (method-function method)
-                    (std-compute-method-function method))
-              method))
-
 (defun make-instance-standard-method (method-class
                                       &key lambda-list qualifiers
                                         specializers body)
@@ -1291,11 +1182,7 @@
     (values))
 
 
-;;;`(slot-value object ',slot-name)
-
-;;;
 ;;; Generic function invocation
-;;;
 
 ;;; apply-generic-function ???
 (defun apply-generic-function (gf args)
@@ -1323,24 +1210,6 @@
         (setf (gethash classes (classes-to-emf-table gf)) emfun)
         (funcall emfun args)))
 
-;;; compute-applicable-methods-using-classes
-#+nil (defun compute-applicable-methods-using-classes (gf required-classes)
-          (sort
-           (copy-list
-            (remove-if-not #'(lambda (method)
-                                 ;; todo: every1 !!!
-                                 (every
-                                  #'(lambda (lst) (subclassp (first lst) (second lst)))
-                                  (mapcar #'(lambda (x y) (list x y))
-                                          required-classes (method-specializers method))))
-                           (generic-function-methods gf)))
-           #'(lambda (m1 m2)
-                 (funcall
-                  (if (eq (class-of gf) *the-class-standard-gf*)
-                      #'std-method-more-specific-p
-                      #'method-more-specific-p)
-                  gf m1 m2 required-classes))))
-
 (defun compute-applicable-methods-using-classes (gf required-classes)
     (sort
      (copy-list
@@ -1357,8 +1226,6 @@
                 #'std-method-more-specific-p
                 #'method-more-specific-p)
             gf m1 m2 required-classes))))
-
-
 
 
 (defun std-method-more-specific-p (gf method1 method2 required-classes)
@@ -1432,24 +1299,6 @@
                  (compute-effective-method-function
                   (method-generic-function method) next-methods))))
 
-;;; :todo: compile-in-lexical-environment
-#+nil (defun std-compute-method-function (method)
-          (let ((form (method-body method))
-                (lambda-list (method-lambda-list method))
-                (mgf (method-generic-function method)))
-              (compile-in-lexical-environment
-               (method-environment method)
-               `(lambda (args next-emfun)
-                    (flet ((call-next-method (&rest cnm-args)
-                               (if (null next-emfun)
-                                   (error "No next method for the generic function ~S." ,mgf)
-                                   (funcall next-emfun (or cnm-args args))))
-                           (next-method-p ()
-                               (not (null next-emfun))))
-                        (apply #'(lambda ,(kludge-arglist lambda-list)
-                                     ,form)
-                               args))))))
-
 (defun std-compute-method-function (method)
     (let ((form (method-body method))
           (lambda-list (method-lambda-list method))
@@ -1479,26 +1328,7 @@
             (append lambda-list '(&key &allow-other-keys))
             lambda-list)))
 
-;;; Run-time environment hacking (Common Lisp ain't got 'em).
-;;(defun top-level-environment ()
-;;    nil) ; Bogus top level lexical environment
-
-;;; fuck he need?
-;;;(defvar *compile-methods* nil)      ; by default, run everything interpreted
-
-;;; see above
-#+nil (defun compile-in-lexical-environment (env lambda-expr)
-          (declare (ignore env))
-          (if *compile-methods*
-              (compile nil lambda-expr)
-              (eval `(function ,lambda-expr))))
-
-#+nil (defun compile-in-lexical-environment (env lambda-expr)
-          (declare (ignore env))
-          (eval `(function ,lambda-expr)))
-
 (defun compile-in-lexical-environment (lambda-expr)
-    ;;(print lambda-expr)
     (eval `(function ,lambda-expr)))
 
 
