@@ -41,9 +41,6 @@
 ;;;
 
 
-(clos.banner::draw)
-
-
 ;;;
 ;;; Standard instances
 ;;;
