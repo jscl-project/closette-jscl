@@ -9,7 +9,7 @@
     ((:file "package")
      (:file "utils")
      (:file "closette")
-     (:file "closette-bootp")
+     (:file "closette-boot")
      (:file "closette-final")
      (:file "tools")))
 
