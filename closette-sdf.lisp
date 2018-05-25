@@ -1,13 +1,16 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-
+;;; System CLOSETTE definition file
+;;; for compilation with LORES:QLOAD
+;;;
 (lores:defsys :closette
-    :path "git/closette"
+    :path "git/jscl-closette"
     :components
     ((:file "package")
      (:file "utils")
      (:file "closette")
-     (:file "bootstrap")
-     (:file "closette-final")))
+     (:file "closette-bootp")
+     (:file "closette-final")
+     (:file "tools")))
 
 ;;; eof
