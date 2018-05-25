@@ -1,7 +1,7 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
 
-(in-package #:closette)
+(in-package #:clos)
 
 ;;;
 ;;; Bootstrap
@@ -62,7 +62,6 @@
 (setf *the-class-standard-class* (eval *the-defclass-standard-class*))
 
 ;; 8. Replace all (3) existing pointers to the skeleton with real one.
-;; note: lambda !!!
 (setf (std-instance-class (find-class 't))
       *the-class-standard-class*)
 (setf (std-instance-class (find-class 'standard-object))
@@ -82,16 +81,12 @@
 (defclass function (t) ())
 (defclass hash-table (t) ())
 (defclass package (t) ())
-;;;(defclass pathname (t) ())
-;;;(defclass readtable (t) ())
 (defclass stream (t) ())
 (defclass list (sequence) ())
 (defclass null (symbol list) ())
 (defclass cons (list) ())
 (defclass vector (array sequence) ())
-;;;(defclass bit-vector (vector) ())
 (defclass string (vector) ())
-;;;(defclass complex (number) ())
 (defclass integer (number) ())
 (defclass float (number) ())
 
