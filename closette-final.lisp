@@ -13,6 +13,7 @@
 
 ;;; Slot access
 
+
 (defgeneric slot-value-using-class (class instance slot-name))
 (defmethod slot-value-using-class ((class standard-class) instance slot-name)
     (std-slot-value instance slot-name))
@@ -43,6 +44,7 @@
     (std-slot-makunbound instance slot-name))
 
 ;;; Instance creation and initialization
+
 
 (defgeneric allocate-instance (class))
 
@@ -242,19 +244,19 @@
     (let ((value))
         (format t "A Closette object ~S ~S  representation:~%"  (class-name object)
                 (class-name (class-of object)))
-        (dolist (sn (mapcar #'closette::slot-definition-name (closette::class-slots (class-of object))))
+        (dolist (sn (mapcar #'slot-definition-name (class-slots (class-of object))))
             (format t "    ~a ~a <- "  sn  (if (slot-boundp object sn) "{bound}" "{unbound}"))
             (setq value (and (slot-boundp object sn) (slot-value object sn)))
             (case sn
-              (closette::name
+              (name
                (format t "~a~%" value))
-              ((closette::superclasses closette::class-precedence-list closette::direct-subclasses)
+              ((superclasses class-precedence-list direct-subclasses)
                (format t "~a~%" (mapcar #'class-name value)))
-              (closette::effective-slots
+              (effective-slots
                (format t "~a~%" (describe-object-content value)))
-              (closette::direct-slots
-               (format t "~a~%" (mapcar #'closette::slot-definition-name  value)))
-              (closette::direct-methods (describe-object-content value))
+              (direct-slots
+               (format t "~a~%" (mapcar #'clos:slot-definition-name  value)))
+              (direct-methods (describe-object-content value))
               (otherwise (format t "~a~%" (describe-object-content value)))))
         (values)))
 

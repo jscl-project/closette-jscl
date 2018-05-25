@@ -15,7 +15,7 @@
 
 
 
-(in-package :closette)
+(in-package :clos)
 
 
 (defvar *logtrace* nil)

@@ -35,6 +35,8 @@
 
 ;; 3. Install standard-class's (circular) class-of link.
 ;;;(setf (std-instance-class the-class-standard-class) the-class-standard-class)
+
+
 (setf (std-instance-class *the-class-standard-class*) *the-class-standard-class*)
 ;; (It's now okay to use class-... accessor).
 
@@ -73,6 +75,8 @@
 ;; (Clear sailing from here on in).
 
 ;; 9. Define the other built-in classes.
+
+
 (defclass symbol (t) ())
 (defclass sequence (t) ())
 (defclass array (t) ())
@@ -91,8 +95,12 @@
 (defclass float (number) ())
 
 ;; 10. Define the other standard metaobject classes.
+
 (setf *the-class-standard-gf* (eval *the-defclass-standard-generic-function*))
+
 (setf *the-class-standard-method* (eval *the-defclass-standard-method*))
+
+
 ;; Voila! The class hierarchy is in place.
 ;; (It's now okay to define generic functions and methods.)
 

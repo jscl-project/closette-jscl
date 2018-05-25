@@ -8,6 +8,7 @@
     :path "git/jscl-closette"
     :components ((:file "package")
                  (:file "utils")
+                 (:file "banner")
                  (:file "closette")
                  (:file "closette-boot")
                  (:file "closette-final")

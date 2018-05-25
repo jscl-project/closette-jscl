@@ -41,6 +41,9 @@
 ;;;
 
 
+(clos.banner::draw)
+
+
 ;;;
 ;;; Standard instances
 ;;;
@@ -57,6 +60,7 @@
     (declare (ignore depth))
     (error "TBD print-object")
     (print-object instance stream))
+
 
 ;;; Standard instance allocation
 
@@ -217,6 +221,7 @@
 ;;;
 ;;; Class metaobjects and standard-class
 ;;;
+
 
 (defparameter *the-defclass-standard-class*  ;standard-class's defclass form
   '(!defclass standard-class ()
@@ -792,7 +797,6 @@
      (body :initarg :body)                   ; :accessor method-body
      (generic-function :initform nil)        ; :accessor method-generic-function
      (function))))                           ; :accessor method-function
-
 
 
 (defvar *the-class-standard-method*)    ;standard-method's class metaobject
