@@ -58,7 +58,7 @@
         )))
 
 
-(defpackage :closette
+(defpackage :clos
   (:use :cl)
   #.(cons :export +closette-symbols+))
 
