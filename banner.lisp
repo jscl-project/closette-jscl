@@ -5,6 +5,11 @@
 
 (defvar *clos-alive-time* (#j:Date:now))
 
+;;; *clos-created*
+;;; *clos-date-arg*
+(lores-timestamp clos)
+
+(defvar *clos-established* (apply 'jscl::make-new #j:Date *clos-date-arg*))
 
 (defun compute-alive ()
     (let* ((ss0 (floor (/ (- (#j:Date:now) *clos-alive-time*) 1000)))
@@ -14,6 +19,17 @@
            (mm (floor rmm))
            (ss (#j:Math:ceil (* (- rmm mm) 60))))
         (values hh mm ss)))
+
+(defun compute-exists (date-arg)
+    (let* ((dt (apply 'jscl::make-new #j:Date date-arg))
+           (ss0 (floor (/ (- (#j:Date:now) ((oget dt "getTime"))) 1000)))
+           (hms (/ ss0 3600))
+           (hh (floor hms))
+           (rmm  (* (- hms  hh) 60))
+           (mm (floor rmm))
+           (ss (#j:Math:ceil (* (- rmm mm) 60))))
+        (format nil "~a.h ~a.m ~a.s" hh mm ss)))
+
 
 (defun make-lisp-info ()
     (format nil "~a ~a ~a"
@@ -42,6 +58,14 @@
    "The JSCL port CLOSETTE system. Was compile the Lores from Moren environment"
    (format nil "~a" (make-lisp-info))
    (format nil "CLOS beta.02.0 built on ~a" (make-compile-date))))
+
+
+(defparameter clos-compile-info
+  (list
+   "The JSCL port CLOSETTE system. CLOS version: beta.02.0"
+   (format nil "This instance was compile the Lores from Moren environment at ~a" *clos-created*)
+   (format nil "and exists ~a" (compute-exists *clos-date-arg*))))
+
 
 
 (defun banner-info (banner)
