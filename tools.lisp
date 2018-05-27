@@ -3,7 +3,7 @@
 ;;; debug tools
 ;;; From closette-test.lisp
 
-(in-package :cl-user)
+(in-package :clos.bin)
 
 (defun subclasses* (class)
     (clos::remove-duplicates
@@ -11,13 +11,13 @@
            (clos::mapappend #'subclasses*
                             (clos::class-direct-subclasses class)))))
 
-(export '(subclasses))
+;;; (export '(subclasses))
 (defun subclasses (class &optional names)
     (let ((result (remove class (subclasses* class))))
         (if names (mapcar #'clos::class-name result)
             result)))
 
-(export '(in-order-p))
+;;; (export '(in-order-p))
 (defun in-order-p (c1 c2)
     (flet ((in-order-at-subclass-p (sub)
                (let ((cpl (clos::class-precedence-list sub)))
@@ -29,7 +29,7 @@
 
 ;;; display defclass
 
-(export '(display-defclass))
+;;; (export '(display-defclass))
 
 (defun display-defclass (class-name)
     (printer-defclass (generate-defclass (find-class class-name)))
@@ -85,7 +85,7 @@
     `(defgeneric ,(clos::generic-function-name gf)
          ,(clos::generic-function-lambda-list gf)))
 
-(export '(display-defgeneric))
+;;; (export '(display-defgeneric))
 (defun display-defgeneric (arg)
     (let ((gf (if (symbolp arg) (clos::find-generic-function arg) arg)))
         (print (generate-defgeneric gf))
@@ -123,7 +123,7 @@
                         specializers)
                 (subseq lambda-list number-required))))
 
-(export '(display-generic-function))
+;;; (export '(display-generic-function))
 (defun display-generic-function (gf-name &key show-body)
     (display-defgeneric gf-name)
     (dolist (method (clos::generic-function-methods (clos::find-generic-function gf-name)))

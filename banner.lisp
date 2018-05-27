@@ -1,13 +1,13 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
 
-(in-package :clos.banner)
+(in-package :clos.bin)
 
 (defvar *clos-alive-time* (#j:Date:now))
 
 
 (defun compute-alive ()
-    (let* ((ss0 (floor (/ (- (#j:Date:now) clos-banner::*clos-alive-time*) 1000)))
+    (let* ((ss0 (floor (/ (- (#j:Date:now) *clos-alive-time*) 1000)))
            (hms (/ ss0 3600))
            (hh (floor hms))
            (rmm  (* (- hms  hh) 60))
@@ -101,10 +101,6 @@
             banner)))
 
 
-(dotimes (i 6) (terpri))
-(compile-info)
-
-
 ;;; alive info
 
 (export '(alive))
@@ -133,5 +129,9 @@
 
 
 (in-package :cl-user)
+
+(dotimes (i 6) (terpri))
+(clos.bin::compile-info)
+
 
 ;;; EOF

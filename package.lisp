@@ -62,4 +62,13 @@
   (:use :cl)
   #.(cons :export +closette-symbols+))
 
+(defpackage :clos.bin
+  (:use :cl)
+  (:export #:alive
+           #:subclasses #:in-order-p
+           #:display-defclass
+           #:display-defgeneric #:display-generic-function #:all-generic-functions
+           #:relevant-generic-functions ))
+
+
 ;;; EOF

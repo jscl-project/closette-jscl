@@ -1,10 +1,7 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
+(in-package :clos.bin)
 
-(defpackage :clos.banner
-  (:use :cl))
-
-(in-package :clos.banner)
 
 (defmacro lban (&rest lines)
     `',lines)
