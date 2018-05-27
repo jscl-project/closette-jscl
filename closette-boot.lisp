@@ -74,24 +74,24 @@
 
 ;; 6. Create the other superclass of standard-class (i.e., standard-object).
 
-(dtf-start)
+(dts-start)
 
 (defclass standard-object (t) ())
 
-(dtf-log "defclass standard-object")
+(dts-log "defclass standard-object")
 
 ;; 7. Define the full-blown version of standard-class.
 
-(dtf-start)
+(dts-start)
 
 (setf *the-class-standard-class* (eval *the-defclass-standard-class*))
 
-(dtf-log "eval defclass standard class")
+(dts-log "eval defclass standard class")
 
 
 ;; 8. Replace all (3) existing pointers to the skeleton with real one.
 
-(dtf-start)
+(dts-start)
 
 (setf (std-instance-class (find-class 't))
       *the-class-standard-class*)
@@ -100,13 +100,13 @@
 (setf (std-instance-class *the-class-standard-class*)
       *the-class-standard-class*)
 
-(dtf-log "Step 8")
+(dts-log "Step 8")
 
 ;; (Clear sailing from here on in).
 
 ;; 9. Define the other built-in classes.
 
-(dtf-start)
+(dts-start)
 
 (defclass symbol (t) ())
 (defclass sequence (t) ())
@@ -125,18 +125,18 @@
 (defclass integer (number) ())
 (defclass float (number) ())
 
-(df-log "Step 9")
+(dts-log "Step 9")
 
 
 ;; 10. Define the other standard metaobject classes.
 
-(dtf-start)
+(dts-start)
 
 (setf *the-class-standard-gf* (eval *the-defclass-standard-generic-function*))
 
 (setf *the-class-standard-method* (eval *the-defclass-standard-method*))
 
-(dtf-log "Step 10")
+(dts-log "Step 10")
 
 ;; Voila! The class hierarchy is in place.
 ;; (It's now okay to define generic functions and methods.)
