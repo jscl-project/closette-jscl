@@ -13,6 +13,7 @@
                  (:file "closette")
                  (:file "closette-boot")
                  (:file "closette-final")
-                 (:file "tools")))
+                 (:file "tools")
+                 (:file "final")))
 
 ;;; eof
