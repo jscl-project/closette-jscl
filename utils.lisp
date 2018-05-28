@@ -18,6 +18,38 @@
     `(setf* ,var (make-instance ',instance ,@args)))
 
 
+;;; kludge for lores::timestamp macro
+
+
+(defun lores/ts-compile-date ()
+    (let* ((dt (jscl::make-new #j:Date)))
+        (flet ((date/component (obj key) (funcall ((jscl::oget obj key "bind") obj))))
+            (let ((yy (date/component dt "getFullYear"))
+                  (mh (date/component dt "getMonth"))
+                  (dd (date/component dt "getDate"))
+                  (hh (date/component dt "getHours"))
+                  (mm (date/component dt "getMinutes"))
+                  (ss (date/component dt "getSeconds")))
+
+                (values
+                 (jscl::concat "" yy "/" (1+ mh) "/" dd " " hh ":"  mm ":" ss " ")
+                 (list yy mh dd hh mm ss))))))
+
+(defun lores/ts-maksymbol (sym tail)
+    (intern (concat "*" (symbol-name sym) (symbol-name tail) "*")))
+
+(export '(lores-timestamp))
+
+(defmacro lores-timestamp (sym)
+    (let* ((s1 (lores/ts-maksymbol `,sym '-created))
+           (s2 (lores/ts-maksymbol `,sym '-date-arg)))
+        (multiple-value-bind (print-date established-date) (lores/ts-compile-date)
+            `(progn
+                 (defvar ,s1  ,print-date)
+                 (defvar ,s2 ',established-date)))))
+
+
+
 (in-package :clos)
 
 
@@ -233,22 +265,6 @@
 
 ;;; (setf getf*) is like (setf getf) except that it always changes the list,
 ;;;              which must be non-nil.
-;;; defsetf getf*
-
-#|
-(defun setf-getf* (plist key new-value)
-    (block body
-        (do ((x plist (cddr x)))
-            ((null x))
-            (when (eq (car x) key)
-                (setf (car (cdr x)) new-value)
-                (return-from body new-value)))
-        (push-on-end key plist)
-        (push-on-end new-value plist)
-        new-value))
-
-(defsetf getf* setf-getf*)
-|#
 
 (defun* (setf getf*) (plist key new-value)
     (block body
