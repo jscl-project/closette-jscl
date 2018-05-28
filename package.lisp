@@ -58,6 +58,7 @@
 
         ;; macro
         #:with-slots
+        #:with-accessors
         )))
 
 
@@ -65,7 +66,7 @@
   (:use :cl)
   #.(cons :export +closette-symbols+))
 
-(export '(clos:with-slots))
+(export '(clos:with-slots clos:with-accessors))
 
 
 

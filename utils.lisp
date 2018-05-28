@@ -368,4 +368,29 @@
     t)
 
 
+;;; macro
+
+(defmacro with-slots ((&rest slots) instance-name &body forms)
+    (let ((instance (gensym)))
+        `(let ((,instance ,instance-name))
+             (symbol-macrolet
+                 ,(loop for slot-name in slots
+                        collect (if (symbolp slot-name)
+                                    `(,slot-name
+                                      (slot-value ,instance ,slot-name))
+                                    `(,(first slot-name)
+                                      (slot-value ,instance ,(second slot-name)))))
+                 ,@forms))))
+
+
+(defmacro with-accessors ((&rest Readers) instance-name &body forms)
+    (let ((instance (gensym)))
+        `(let ((,instance ,instance-name))
+             (symbol-macrolet
+                 ,(loop for (var reader) in Readers
+                        collect `(,var (,reader ,instance)))
+                 ,@forms))))
+
+
+
 ;;; EOF
