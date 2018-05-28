@@ -10,11 +10,11 @@
          (defvar *debug-ts/end*  0)))
 
 (defmacro dts-start ()
-    (setq *debug-ts/start* (#j:Date:now)))
+    `(setq *debug-ts/start* (#j:Date:now)))
 
 (defmacro dts-log (note)
-    (#j:console:log (jscl::lisp-to-js note)
-                    (/ (- (#j:Date:now) *debug-ts/start*) 1000)))
+    `(#j:console:log (jscl::lisp-to-js ,note)
+                     (/ (- (#j:Date:now) *debug-ts/start*) 1000)))
 
 (dts-def)
 
