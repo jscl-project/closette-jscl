@@ -14,6 +14,9 @@
 (defmacro safe (&rest body) `(prog1 t ,@body))
 
 
+(defmacro make-instance* (var (instance &rest args))
+    `(setf* ,var (make-instance ',instance ,@args)))
+
 
 (in-package :clos)
 
@@ -43,6 +46,15 @@
          (if (symbolp note) (symbol-name note))
          (print-object*  class)))
     (values))
+
+
+;;; print*
+
+(defun print* (&rest args)
+    (dolist (it args)
+        (princ it) (princ " "))
+    (terpri))
+
 
 ;;; print unreadable
 (defun print-obj* (head things)

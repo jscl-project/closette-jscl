@@ -55,12 +55,19 @@
         #:compute-effective-method-function #:compute-method-function
         #:apply-methods #:apply-method
         #:find-generic-function         ; Necessary artifact of this implementation
+
+        ;; macro
+        #:with-slots
         )))
 
 
 (defpackage :clos
   (:use :cl)
   #.(cons :export +closette-symbols+))
+
+(export '(clos:with-slots))
+
+
 
 (defpackage :clos.bin
   (:use :cl)
