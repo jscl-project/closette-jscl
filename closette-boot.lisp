@@ -4,20 +4,6 @@
 (in-package #:clos)
 
 
-(defmacro dts-def ()
-    `(progn
-         (defvar *debug-ts/start* 0)
-         (defvar *debug-ts/end*  0)))
-
-(defmacro dts-start ()
-    `(setq *debug-ts/start* (#j:Date:now)))
-
-(defmacro dts-log (note)
-    `(#j:console:log (jscl::lisp-to-js ,note)
-                     (/ (- (#j:Date:now) *debug-ts/start*) 1000)))
-
-(dts-def)
-
 ;;;
 ;;; Bootstrap
 ;;;
@@ -74,24 +60,18 @@
 
 ;; 6. Create the other superclass of standard-class (i.e., standard-object).
 
-(dts-start)
-
 (defclass standard-object (t) ())
 
-(dts-log "defclass standard-object")
 
 ;; 7. Define the full-blown version of standard-class.
 
-(dts-start)
 
 (setf *the-class-standard-class* (eval *the-defclass-standard-class*))
 
-(dts-log "eval defclass standard class")
 
 
 ;; 8. Replace all (3) existing pointers to the skeleton with real one.
 
-(dts-start)
 
 (setf (std-instance-class (find-class 't))
       *the-class-standard-class*)
@@ -100,13 +80,11 @@
 (setf (std-instance-class *the-class-standard-class*)
       *the-class-standard-class*)
 
-(dts-log "Step 8")
 
 ;; (Clear sailing from here on in).
 
 ;; 9. Define the other built-in classes.
 
-(dts-start)
 
 (defclass symbol (t) ())
 (defclass sequence (t) ())
@@ -125,18 +103,14 @@
 (defclass integer (number) ())
 (defclass float (number) ())
 
-(dts-log "Step 9")
-
 
 ;; 10. Define the other standard metaobject classes.
 
-(dts-start)
 
 (setf *the-class-standard-gf* (eval *the-defclass-standard-generic-function*))
 
 (setf *the-class-standard-method* (eval *the-defclass-standard-method*))
 
-(dts-log "Step 10")
 
 ;; Voila! The class hierarchy is in place.
 ;; (It's now okay to define generic functions and methods.)
