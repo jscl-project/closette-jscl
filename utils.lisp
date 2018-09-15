@@ -3,7 +3,7 @@
 ;;;
 
 
-(in-package :cl-user)
+;;;(in-package :cl-user)
 
 (defmacro setf* (var &rest expr)
     `(progn
@@ -17,67 +17,29 @@
 (defmacro make-instance* (var (instance &rest args))
     `(setf* ,var (make-instance ',instance ,@args)))
 
+;;; REMP Common lisp
+(defmacro remp (properties key)
+    (let ((prop-key (gensym))
+          (prop-list (gensym))
+          (plist (gensym))
+          (found-seq (gensym)))
 
-;;; kludge for lores::timestamp macro
-
-
-(defun lores/ts-compile-date ()
-    (let* ((dt (jscl::make-new #j:Date)))
-        (flet ((date/component (obj key) (funcall ((jscl::oget obj key "bind") obj))))
-            (let ((yy (date/component dt "getFullYear"))
-                  (mh (date/component dt "getMonth"))
-                  (dd (date/component dt "getDate"))
-                  (hh (date/component dt "getHours"))
-                  (mm (date/component dt "getMinutes"))
-                  (ss (date/component dt "getSeconds")))
-
-                (values
-                 (jscl::concat "" yy "/" (1+ mh) "/" dd " " hh ":"  mm ":" ss " ")
-                 (list yy mh dd hh mm ss))))))
-
-(defun lores/ts-maksymbol (sym tail)
-    (intern (concat "*" (symbol-name sym) (symbol-name tail) "*")))
-
-(export '(lores-timestamp))
-
-(defmacro lores-timestamp (sym)
-    (let* ((s1 (lores/ts-maksymbol `,sym '-created))
-           (s2 (lores/ts-maksymbol `,sym '-date-arg)))
-        (multiple-value-bind (print-date established-date) (lores/ts-compile-date)
-            `(progn
-                 (defvar ,s1  ,print-date)
-                 (defvar ,s2 ',established-date)))))
+        `(let* ((,prop-key ,key)
+                (,prop-list ,properties))
+             (do ((,plist ,prop-list (cddr ,plist)) (,found-seq nil ,plist))
+                 ((atom ,plist) Nil)
+                 (cond ((atom (cdr ,plist))
+                        (error "REMP: Odd-length property list"))
+                       ((eq (Car ,plist) ,prop-key)
+                        (cond (,found-seq
+                               (rplacd (cdr ,found-seq) (cddr ,plist))
+                               (return t))
+                              (t (setq ,prop-list (cddr ,found-seq))
+                                 (setq ,properties ,prop-list)
+                                 (return t)))))))))
 
 
-
-(in-package :clos)
-
-
-(defvar *logtrace* nil)
-(defvar *keytrace* nil)
-
-
-;;; switch on/off trace
-(export '(logtrace))
-(defun logtrace (&key (log nil) (key nil))
-    (if log
-        (if (eq log :on)
-            (setq *logtrace* t)
-            (setq *logtrace nil)))
-    (if key
-        (if (eq key :on)
-            (setq *keytrace* t)
-            (setq *keytrace nil))
-        (some #'identity (list log key))))
-
-;;; trace note class
-(export '(log-trace))
-(defun log-trace (note class)
-    (when *logtrace*
-        (#j:console:log
-         (if (symbolp note) (symbol-name note))
-         (print-object*  class)))
-    (values))
+;;;(in-package :amop)
 
 
 ;;; print*
@@ -153,16 +115,6 @@
            place)
           (t '@)))
 
-(export '(key-trace))
-(defun key-trace (fn keys)
-    (when *keytrace*
-        (let ((fname (if (symbolp fn) (symbol-name fn) fn))
-              (result))
-            (setq result (mapcar (lambda (x) (if (symbolp x) (symbol-name x) (class-name-trace x))) keys))
-            (#j:console:log "Keys " fname (format nil "~a" result))))
-    (values))
-
-
 
 ;;; kludge for (defun (setf name) ...) syntax
 (defun setf-function-symbol (spec)
@@ -172,15 +124,36 @@
                     (symbol-package (cadr spec))))
         spec))
 
-(defmacro defun* (name forms &rest body)
-    (cond ((symbolp name)
-           `(defun ,name ,forms ,@body))
-          ((and (consp name) (eq (car name) 'setf))
-           (let ((sfn (setf-function-symbol name)))
-               `(progn
-                    (defun ,sfn ,forms ,@body)
-                    (defsetf ,(cadr name) ,sfn))))
-          (t (error "defun* ~a unknow function specifier" name))))
+#+nil (defmacro defun* (name forms &rest body)
+          (cond ((symbolp name)
+                 `(defun ,name ,forms ,@body))
+                ((and (consp name) (eq (car name) 'setf))
+                 (let ((sfn (setf-function-symbol name)))
+                     `(progn
+                          (defun ,sfn ,forms ,@body)
+                          (defsetf ,(cadr name) ,sfn))))
+                (t (error "defun* ~a unknow function specifier" name))))
+
+
+#+nil (defmacro defun* (name forms &rest body)
+          (cond ((and (consp name) (eq (car name) 'setf))
+                 (let ((sfn (setf-function-symbol name)))
+                     `(progn
+                          (defun ,sfn ,forms ,@body)
+                          (defsetf ,(cadr name) ,sfn))))
+                (t (error "defun* ~a unknow function specifier" name))))
+
+
+#+nil (defmacro defun* (name forms &rest body)
+          (cond ((and (consp name) (eq (car name) 'setf))
+                 (let ((sfn (let ((print-name (write-to-string name)))
+                                (intern print-name
+                                        (symbol-package (cadr name))))))
+                     `(progn
+                          (defun ,sfn ,forms ,@body)
+                          (defsetf ,(cadr name) ,sfn))))
+                (t (error "defun* ~a unknow function specifier" name))))
+
 
 
 ;;; kludge for defsetf generic accessor
@@ -202,7 +175,7 @@
 
 
 ;;; (setf (cadr lst) something)
-(defun* (setf cadr) (lst value) (rplaca (cdr lst) value))
+;;;(defun* (setf cadr) (lst value) (rplaca (cdr lst) value))
 
 
 ;;; kludge to rotatef
@@ -266,7 +239,7 @@
 ;;; (setf getf*) is like (setf getf) except that it always changes the list,
 ;;;              which must be non-nil.
 
-(defun* (setf getf*) (plist key new-value)
+(defun (setf getf*) (new-value plist key)
     (block body
         (do ((x plist (cddr x)))
             ((null x))
@@ -295,59 +268,102 @@
 
 
 ;;; set-difference
-(defun set-difference (list1 list2 &key key (test #'eq))
-    (cond (list2
-           (let ((result '()))
-               (dolist (it list1)
-                   (when (not (member it list2 :key key :test test))
-                       (push it result)))
-               result))
-          (t list1)))
+#+nil (defun set-difference (list1 list2 &key key (test #'eq))
+          (cond (list2
+                 (let ((result '()))
+                     (dolist (it list1)
+                         (when (not (member it list2 :key key :test test))
+                             (push it result)))
+                     result))
+                (t list1)))
 
 ;;; union
-(defun union (list1 list2 &key key (test #'eq))
-    (cond ((and list1 list2)
-           (let ((result list2))
-               (dolist (it list1)
-                   (when (not (member it list2 :key key :test test))
-                       (push it result)))
-               result))
-          (list1)
-          (list2)))
+;;; note: redisagne
+#+nil (defun union (list1 list2 &key key (test #'eq))
+          (cond ((and list1 list2)
+                 (let ((result list2))
+                     (dolist (it list1)
+                         (when (not (member it list2 :key key :test test))
+                             (push it result)))
+                     result))
+                (list1)
+                (list2)))
 
 
 
 ;;; intersection
-(defun intersection (list1 list2 &key key (test #'eql))
-    (let ((result '()))
-        (dolist (it list1)
-            (when (member it list2 :key key :test test )
-                (push it result)))
-        result))
+#+nil (defun intersection (list1 list2 &key key (test #'eql))
+          (let ((result '()))
+              (dolist (it list1)
+                  (when (member it list2 :key key :test test )
+                      (push it result)))
+              result))
 
 
 ;;; remove-duplicates bug:
-(defun remove-duplicates (sequence &key from-end (test 'eql) test-not (key 'identity) (start 0) end)
-    (when (or (not (eql start 0))
-              end)
-        (setq sequence (subseq sequence start end)))
-    (if from-end
-        (do* ((result (cons nil nil))
-              (tail result)
-              (i sequence (cdr i)))
-             ((null i)
-              (cdr result))
-            (unless (member (car i) (cdr result) :test test :key key)
-                (setf (cdr tail) (cons (car i) nil)
-                      tail (cdr tail))))
-        (do* ((result (cons nil nil))
-              (tail result)
-              (i sequence (cdr i)))
-             ((null i)
-              (cdr result))
-            (unless (member (car i) (cdr i) :test test :key key)
-                (setf (cdr tail) (cons (car i) nil)
-                      tail (cdr tail))))))
+#+nil (defun remove-duplicates (sequence &key from-end (test 'eql) test-not (key 'identity) (start 0) end)
+          (when (or (not (eql start 0))
+                    end)
+              (setq sequence (subseq sequence start end)))
+          (if from-end
+              (do* ((result (cons nil nil))
+                    (tail result)
+                    (i sequence (cdr i)))
+                   ((null i)
+                    (cdr result))
+                  (unless (member (car i) (cdr result) :test test :key key)
+                      (setf (cdr tail) (cons (car i) nil)
+                            tail (cdr tail))))
+              (do* ((result (cons nil nil))
+                    (tail result)
+                    (i sequence (cdr i)))
+                   ((null i)
+                    (cdr result))
+                  (unless (member (car i) (cdr i) :test test :key key)
+                      (setf (cdr tail) (cons (car i) nil)
+                            tail (cdr tail))))))
+
+#+nil (defun remove-duplicates (seq &key from-end (test 'eql) test-not (key 'identity) (start 0) end)
+          (let ((result)
+                (sequence (if from-end (reverse seq) seq)))
+              (when test-not
+                  (setf test (complement test-not)))
+              (when (or (not (eql start 0))
+                        end)
+                  (setq sequence (subseq sequence start end)))
+              (dolist (it sequence)
+                  (unless (find (funcall key it) result :key key :test test)
+                      (push it result)))
+              (if from-end
+                  result
+                  (reverse result))))
+
+#+nil (defun remove-duplicates (seq &key from-end (test 'eql) test-not (key 'identity) (start 0) end)
+          (let ((result)
+                (test-fn test)
+                (sequence (if from-end seq (reverse seq))))
+              (when test-not
+                  (setq test-fn (complement test-not)))
+              (when (or (not (eql start 0))
+                        end)
+                  (setq sequence (subseq sequence start end)))
+              (dolist (it sequence)
+                  (unless (find (funcall key it) result :key key :test test-fn)
+                      (push it result)))
+              (if from-end
+                  ;;result
+                  (reverse result)
+                  result)))
+
+
+;;; test remove-duplicates
+;;;(test (equal '(A C B D E) (remove-duplicates '(a b c b d d e))))
+;;;(test (equal '(A B C D E) (remove-duplicates '(a b c b d d e) :from-end t)))
+
+
+
+
+
 
 ;;;
 (defun find-if-not (predicate sequence &key key)
@@ -355,7 +371,28 @@
 
 
 ;;; sort
-(defun sort1 (seq fn key)
+#+nil (defun sort1 (seq fn key)
+          (cond ((endp seq) '())
+                (t (do* ((ipos seq (cdr ipos))
+                         (imin ipos ipos))
+                        ((null ipos) seq)
+                       (do ((i (cdr ipos) (cdr i)))
+                           ((null i))
+                           (when (funcall fn (funcall key (car i)) (funcall key (car imin)))
+                               (setf imin i)))
+                       (when (not (eq imin ipos))
+                           (let ((old-ipos (car ipos))
+                                 (old-imin (car imin)))
+                               (setf (car ipos) old-imin
+                                     (car imin) old-ipos)))))))
+
+#+nil (defun sort (seq fn &key key)
+          (unless key (setf key 'identity))
+          (sort1 seq fn  key))
+
+
+
+(defun sort (seq fn &key (key 'identity))
     (cond ((endp seq) '())
           (t (do* ((ipos seq (cdr ipos))
                    (imin ipos ipos))
@@ -370,9 +407,7 @@
                          (setf (car ipos) old-imin
                                (car imin) old-ipos)))))))
 
-(defun sort (seq fn &key key)
-    (unless key (setf key 'identity))
-    (sort1 seq fn  key))
+
 
 
 ;;; every with more sequences
