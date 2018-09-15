@@ -59,14 +59,15 @@
 
 ;;; note: last remove setf
 
+#+nil
 (defun (setf generic-function-methods) (new-value gf)
     (setf (slot-value gf 'methods) new-value))
 
 
 (defun push-generic-function-methods (new-value gf)
     (let ((lst (!slot-value gf 'methods)))
-        (push new-value lst)
-        (setf-slot-value gf 'methods lst)))
+        ;;(push new-value lst)
+        (setf-slot-value gf 'methods (cons new-value lst))))
 
 
 ;;; generic-function-discriminating-function

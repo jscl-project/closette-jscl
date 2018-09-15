@@ -289,7 +289,6 @@
 #+nil (defun (setf class-direct-methods) (new-value class)
           (push new-value (!slot-value class 'direct-methods)))
 
-
 (defun pushnew-class-direct-methods (new-value class)
     (let ((lst (!slot-value class 'direct-methods)))
         (pushnew new-value lst)
