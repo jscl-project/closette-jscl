@@ -3,6 +3,8 @@
 ;;(in-package :amop)
 
 
+(push :mop *features*)
+
 (defmacro defclass (name direct-superclasses direct-slots &rest options)
     `(progn
          (ensure-class ',name
