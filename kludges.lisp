@@ -3,7 +3,7 @@
 ;;;
 
 
-(in-package :amop)
+;;;(in-package :amop)
 
 ;;; print*
 (defun print* (&rest args)
@@ -67,6 +67,82 @@
 (defun print-object-class-name (place)
     (format nil "{~a ~a}" (class-name (class-of place))
             (class-name (class-of (class-of place))) ))
+
+
+;;; print support
+
+(defun mop-object-selector (obj)
+    (let ((place (class-of obj)))
+        (cond ((eq place *the-class-standard-method*)
+               (concat "#<standard-method "  (class-name obj) ">"))
+              ((eq place *the-class-standard-gf*)
+               (concat "#<standard-generic-function "  (generic-function-name obj) ">"))
+              ((eq place *the-class-standard-class*)
+               (concat "#<standard-class " (class-name obj) ">"))
+              (t (concat "#<instance " (class-name place) " "
+                         (mop-object-slots (std-instance-slots obj)) ">" )) )))
+
+(defun mop-object-selector (obj)
+    (let ((place (class-of obj)))
+        (cond ((eq place *the-class-standard-method*)
+               (concat "#<standard-method "  (class-name obj) ">"))
+              ((eq place *the-class-standard-gf*)
+               (concat "#<standard-generic-function "  (generic-function-name obj) ">"))
+              ((eq place *the-class-standard-class*)
+               (concat "#<standard-class " (class-name obj) ">"))
+              (t (concat "#<instance " (class-name place) " "
+                         (mop-object-slots (std-instance-slots obj)) ">" )) )))
+
+
+(defun mop-object-slots (slot)
+    (unless (arrayp slot)
+        (error "its not slot"))
+    (let* ((size (length slot))
+           (place)
+           (result))
+        (dotimes (idx size)
+            (setq place (aref slot idx))
+            (cond ((std-instance-p place)
+                   (push (mop-object-class-name place) result))
+                  ((consp place)
+                   (push "(..) " result))
+                  ((arrayp place)
+                   (push "#(..) " result))
+                  ((or (numberp place)
+                       (symbolp place))
+                   (push (concat " "(string place)) result))
+                  ((stringp place)
+                   (push (concat " "place) result))
+                  (t (push "@ " result))))
+        (apply 'concat (reverse result))))
+
+(defun mop-object-class-name (place)
+    (#j:console:log :obj-class-name place)
+    (concat (string (!class-name (!class-of place)))
+            " "
+            (string (!class-name (!class-of (!class-of place)))) ))
+
+
+(defun mop-object-printer (form stream)
+    (let ((res (case (!class-name (!class-of form))
+                 (standard-class
+                  ;;(#j:console:log "class")
+                  (concat "#<standard-class " (string (!class-name form)) ">"))
+                 (standard-generic-function
+                  ;;(#j:console:log "general")
+                  (concat "#<standard-generic-function " (string (generic-function-name form)) ">"))
+                 (standard-method
+                  ;;(#j:console:log "method")
+                  (concat "#<standard-method " (string (!class-name form)) ">"))
+                 (otherwise
+                  ;;(#j:console:log "instance" (string (!class-name (!class-of form))))
+                  (concat "#<instance " (string (!class-name (!class-of form))) " "
+                          (mop-object-slots (std-instance-slots form)))))))
+        (#j:console:log "Result" res)
+        (simple-format stream "~a" res)))
+
+
+
 
 ;;; kludge for (defun (setf name) ...) syntax
 (defun setf-function-symbol (spec)
