@@ -61,7 +61,7 @@
                        (stringp place)
                        (symbolp place))
                    (push place result))
-                  (t push '@ result)))
+                  (t (push '@ result))))
         (reverse result)))
 
 (defun print-object-class-name (place)
