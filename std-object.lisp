@@ -32,11 +32,39 @@
 
 
 
+#+nil
 (defun std-allocate-instance (class)
     (allocate-std-instance
      :class class
      :slots (allocate-slot-storage (count-if #'instance-slot-p (class-slots class))
                                    *secret-unbound-value*)))
+
+#+nil
+(defun std-allocate-instance (class)
+    (let ((instance
+            (allocate-std-instance
+             :class class
+             :slots (allocate-slot-storage (count-if #'instance-slot-p (class-slots class))
+                                           *secret-unbound-value*))))
+        (setf (oget instance "tagName") "std-instance")
+        instance ))
+
+
+(defun std-allocate-instance (class)
+    #-jscl
+    (allocate-std-instance
+     :class class
+     :slots (allocate-slot-storage (count-if #'instance-slot-p (class-slots class))
+                                   *secret-unbound-value*))
+    #+jscl
+    (let ((instance
+            (allocate-std-instance
+             :class class
+             :slots (allocate-slot-storage (count-if #'instance-slot-p (class-slots class))
+                                           *secret-unbound-value*))))
+        (setf (oget instance "tagName") :std-instance)
+        instance ))
+
 
 ;;; Simple vectors are used for slot storage.
 
