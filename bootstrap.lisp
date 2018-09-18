@@ -8,15 +8,16 @@
 ;;; Bootstrap
 ;;;
 
-(/debug "loading & build standard hierarhy!")
+(/debug "build standard hierarhy!")
 
-(in-package :amop)
+;;;(in-package :amop)
 
 (defun boot-stage-1 ()
-    (forget-all-classes)
-    (forget-all-generic-functions)
+    ;;(forget-all-classes)
+    ;;(forget-all-generic-functions)
 
     ;; 1. Figure out standard-class's slots.
+    #+nil
     (setq *the-slots-of-standard-class*
           (mapcar (lambda (slotd)
                       (make-effective-slot-definition
