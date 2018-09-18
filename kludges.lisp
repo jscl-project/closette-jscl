@@ -93,7 +93,7 @@
         (apply 'concat (reverse result))))
 
 (defun mop-object-class-name (place)
-    (#j:console:log :obj-class-name place)
+    ;;(#j:console:log :obj-class-name place)
     (concat (string (!class-name (!class-of place)))
             " "
             (string (!class-name (!class-of (!class-of place)))) ))
@@ -105,11 +105,31 @@
                  (standard-generic-function
                   (concat "#<standard-generic-function " (string (generic-function-name form)) ">"))
                  (standard-method
-                  (concat "#<standard-method " (string (!class-name form)) ">"))
+                  (concat "#<standard-method " (string (generic-function-name (method-generic-function form)))
+                          (write-to-string (generate-specialized-arglist form)) ">"))
                  (otherwise
                   (concat "#<instance " (string (!class-name (!class-of form))) " "
                           (mop-object-slots (std-instance-slots form)) ">")))))
-        (simple-format stream "~a" res)))
+        #+nil(simple-format stream "~a" res)
+        (simple-format stream res)))
+
+
+;;; hash-table printer
+(defun hash-table-object-printer (form stream)
+    (let* ((hashfn (cadr form))
+           (fname (oget hashfn "fname"))
+           (tail-pos (position #\- fname))
+           (testfn (subseq fname 0 tail-pos))
+           (res))
+        (setq res (concat "#<hash-table :test " (string-downcase testfn) ">"))
+        (simple-format stream res)))
+
+
+;;; structure printer
+(defun structure-object-printer (form stream)
+    (let ((res))
+        (setq res (concat "#<structure " (string-downcase (string (car form))) ">"))
+        (simple-format stream res)))
 
 
 
@@ -203,20 +223,29 @@
 
 
 ;;; sort
-(defun sort1 (seq fn &key (key 'identity))
-    (cond ((endp seq) '())
-          (t (do* ((ipos seq (cdr ipos))
-                   (imin ipos ipos))
-                  ((null ipos) seq)
-                 (do ((i (cdr ipos) (cdr i)))
-                     ((null i))
-                     (when (funcall fn (funcall key (car i)) (funcall key (car imin)))
-                         (setf imin i)))
-                 (when (not (eq imin ipos))
-                     (let ((old-ipos (car ipos))
-                           (old-imin (car imin)))
-                         (setf (car ipos) old-imin
-                               (car imin) old-ipos)))))))
+;;; https://en.wikipedia.org/wiki/Selection_sort
+(defun sort1 (lst fn &key (key 'identity))
+    (if (endp lst) '()
+        (block selection-sort
+            (let* ((j lst)
+                   (imin j))
+                (while t
+                    (when (null j)
+                        (return lst))
+                    (tagbody
+                       (let ((i (cdr j)))
+                           (while t
+                               (if (null i) (return nil))
+                               (if (funcall fn
+                                            (funcall key (car i))
+                                            (funcall key (car imin)))
+                                   (setq imin i))
+                               (setq i (cdr i))))
+                       (when (not (eq imin j))
+                           (let ((swap-j (car j))
+                                 (swap-imin (car imin)))
+                               (setf (car j) swap-imin (car imin) swap-j))))
+                    (setq j (cdr j) imin j)))) ))
 
 
 ;;; every with more sequences
