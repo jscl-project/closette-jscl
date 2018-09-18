@@ -62,7 +62,7 @@
 
 
 (defmethod make-instance ((class standard-class) &rest initargs)
-    (#j:console:log "make-instance-class" (format nil "~a" (class-name class)) initargs)
+    ;;(#j:console:log "make-instance-class" (format nil "~a" (class-name class)) initargs)
     (let ((instance (allocate-instance class)))
         (apply #'initialize-instance instance initargs)
         instance))
@@ -84,7 +84,7 @@
 (defmethod shared-initialize ((instance standard-object) slot-names &rest all-keys)
     (dolist (slot (class-slots (class-of instance)))
         (let ((slot-name (slot-definition-name slot)))
-            (#j:console:log "slot-name" slot-name)
+            ;;(#j:console:log "slot-name" slot-name)
             (multiple-value-bind (init-key init-value foundp)
                 (get-properties all-keys (slot-definition-initargs slot))
                 (if foundp
