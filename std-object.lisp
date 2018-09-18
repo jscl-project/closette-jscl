@@ -9,8 +9,8 @@
 ;;; Standard instances
 ;;;
 
-(jscl::def!struct (std-instance (:constructor allocate-std-instance (class slots))
-                                (:predicate std-instance-p))
+(def!struct (std-instance (:constructor allocate-std-instance (class slots))
+                          (:predicate std-instance-p))
     class
     slots)
 
@@ -62,7 +62,7 @@
              :class class
              :slots (allocate-slot-storage (count-if #'instance-slot-p (class-slots class))
                                            *secret-unbound-value*))))
-        (setf (oget instance "tagName") :std-instance)
+        (setf (oget instance "tagName") :mop-object)
         instance ))
 
 
@@ -77,7 +77,21 @@
 ;;; standard-class must be determined without making any further slot
 ;;; references.
 
+
+(defvar *the-slots-of-standard-class*
+  '((:NAME NAME :INITARGS (:NAME) :INITFORM NIL :INITFUNCTION NIL :ALLOCATION :INSTANCE)
+    (:NAME DIRECT-SUPERCLASSES :INITARGS (:DIRECT-SUPERCLASSES) :INITFORM NIL :INITFUNCTION NIL :ALLOCATION :INSTANCE)
+    (:NAME DIRECT-SLOTS :INITARGS NIL :INITFORM NIL :INITFUNCTION NIL :ALLOCATION :INSTANCE)
+    (:NAME CLASS-PRECEDENCE-LIST :INITARGS NIL :INITFORM NIL :INITFUNCTION NIL :ALLOCATION :INSTANCE)
+    (:NAME EFFECTIVE-SLOTS :INITARGS NIL :INITFORM NIL :INITFUNCTION NIL :ALLOCATION :INSTANCE)
+    (:NAME DIRECT-SUBCLASSES :INITARGS NIL :INITFORM NIL :INITFUNCTION NIL :ALLOCATION :INSTANCE)
+    (:NAME DIRECT-METHODS :INITARGS NIL :INITFORM NIL :INITFUNCTION NIL :ALLOCATION :INSTANCE))
+  "standard-class's class-slots")
+
+
+#+nil
 (defvar *the-slots-of-standard-class*) ;standard-class's class-slots
+
 (defvar *the-class-standard-class*)    ;standard-class's class metaobject
 
 
@@ -107,8 +121,6 @@
 
 (defun setf-slot-contents (slots location new-value)
     (setf (aref slots location) new-value))
-
-
 
 
 ;;; std-slot-value
@@ -144,9 +156,7 @@
 (defun (setf slot-value) (new-value object slot-name)
     (if (eq (!class-of (!class-of object)) *the-class-standard-class*)
         (setf-std-slot-value object slot-name new-value)
-        (setf-slot-value-using-class
-         new-value (!class-of object) object slot-name)))
-
+        (setf-slot-value-using-class new-value (!class-of object) object slot-name)))
 
 
 ;;; std-slot-boundp
@@ -161,9 +171,7 @@
         (slot-boundp-using-class (!class-of object) object slot-name)))
 
 
-
 ;;; std-slot-makunbound
-
 (defun std-slot-makunbound (instance slot-name)
     (let ((location (slot-location (!class-of instance) slot-name))
           (slots (std-instance-slots instance)))
@@ -359,12 +367,9 @@
                    (setq initfunction
                          `(function (lambda () ,(cadr olist))))
                    (setq initform `',(cadr olist)))
-                  (:initarg
-                   (push-on-end (cadr olist) initargs))
-                  (:reader
-                   (push-on-end (cadr olist) readers))
-                  (:writer
-                   (push-on-end (cadr olist) writers))
+                  (:initarg (push-on-end (cadr olist) initargs))
+                  (:reader  (push-on-end (cadr olist) readers))
+                  (:writer  (push-on-end (cadr olist) writers))
                   (:accessor
                    ;; accessor reader fn
                    (push-on-end (cadr olist) readers)
@@ -386,18 +391,12 @@
 
 (defun canonicalize-defclass-option (option)
     (case (car option)
-      (:metaclass
-       (list ':metaclass
-             `(!find-class ',(cadr option))))
+      (:metaclass (list ':metaclass `(!find-class ',(cadr option))))
       (:default-initargs
-       (list
-        ':direct-default-initargs
-        `(list ,@(mapappend
-                  #'(lambda (x) x)
-                  (mapplist
-                   #'(lambda (key value)
-                         `(',key ,value))
-                   (cdr option))))))
+       (list ':direct-default-initargs
+             `(list ,@(mapappend #'(lambda (x) x)
+                                 (mapplist #'(lambda (key value) `(',key ,value))
+                                           (cdr option))))))
       (t (list `',(car option) `',(cadr option)))))
 
 ;;; find-class
@@ -458,8 +457,8 @@
 (defun std-after-initialization-for-classes (class &rest all-keys)
     (let* ((direct-superclasses (get-keyword-from all-keys :direct-superclasses))
            (direct-slots (get-keyword-from all-keys :direct-slots))
-           (supers  (or direct-superclasses
-                        (list (!find-class 'standard-object)))))
+           (supers (or direct-superclasses
+                       (list (!find-class 'standard-object)))))
 
         ;;(print* 'after-init-for (class-name class))
 
@@ -475,10 +474,9 @@
         ;;(print* 'direct-superclasses)
 
 
-        (let ((slots
-                (mapcar (lambda (slot-properties)
-                            (apply 'make-direct-slot-definition slot-properties))
-                        direct-slots)))
+        (let ((slots (mapcar (lambda (slot-properties)
+                                 (apply 'make-direct-slot-definition slot-properties))
+                             direct-slots)))
 
             ;;(setf (class-direct-slots class) slots)
             (setf-class-direct-slots class slots)
@@ -742,19 +740,5 @@
                     (mapappend #'slot-definition-initargs
                                direct-slots))
          :allocation (slot-definition-allocation (car direct-slots)))))
-
-
-;;; macro
-#+nil
-(defmacro def!class (name direct-superclasses direct-slots &rest options)
-    `(progn
-         (ensure-class ',name
-                       :direct-superclasses
-                       ,(canonicalize-direct-superclasses direct-superclasses)
-                       :direct-slots
-                       ,(canonicalize-direct-slots direct-slots)
-                       ,@(canonicalize-defclass-options options))
-         ',name))
-
 
 ;;; EOF
