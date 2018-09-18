@@ -301,17 +301,6 @@
         gf))
 
 
-;;; macro
-
-#+nil
-(defmacro def!generic (function-name lambda-list &rest options)
-    `(prog1 ',function-name
-         (!ensure-generic-function
-          ',function-name
-          :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
-          ,@(canonicalize-defgeneric-options options))))
-
-
 
 
 ;;; EOF
