@@ -137,7 +137,7 @@
              (generic-function-method-class gf)
              all-keys)))
         (!add-method gf new-method)
-        (#j:console:log (format nil "~a" (generate-defmethod new-method)))
+        ;;(#j:console:log (format nil "~a" (generate-defmethod new-method)))
         new-method))
 
 ;;; make-instance-standard-method creates and initializes an instance of
@@ -173,7 +173,7 @@
 ;;; programs without this feature of full CLOS.
 (defun !add-method (gf method)
 
-    (#j:console:log "Add-method" (generic-function-name gf))
+    ;;(#j:console:log "Add-method" (generic-function-name gf))
 
     (let ((old-method
             (!find-method gf
@@ -181,7 +181,7 @@
                           (!method-specializers method)
                           nil) ))
 
-        (#j:console:log "Old method" old-method)
+        ;;(#j:console:log "Old method" old-method)
 
         (when old-method (!remove-method gf old-method)))
 
@@ -191,20 +191,21 @@
     ;; note: push method
 
 
-    (#j:console:log "length1" (length (generic-function-methods gf)))
+    ;;(#j:console:log "length1" (length (generic-function-methods gf)))
     ;;(push method (generic-function-methods gf))
     (push-generic-function-methods method gf)
-    (#j:console:log "length2" (length (generic-function-methods gf)))
+
+    ;;(#j:console:log "length2" (length (generic-function-methods gf)))
 
 
 
     (dolist (specializer (!method-specializers method))
-        (#j:console:log "length3" (length (class-direct-methods specializer)))
+        ;;(#j:console:log "length3" (length (class-direct-methods specializer)))
 
         ;;(pushnew method (class-direct-methods specializer))
 
         (pushnew-class-direct-methods method specializer)
-        (#j:console:log "length4" (length (class-direct-methods specializer)))
+        ;;(#j:console:log "length4" (length (class-direct-methods specializer)))
 
         )
 
@@ -221,7 +222,7 @@
 
 (defun !remove-method (gf method)
 
-    (#j:console:log "Remove method" (generic-function-name gf))
+    ;;(#j:console:log "Remove method" (generic-function-name gf))
 
     ;;(setf (generic-function-methods gf)
     (setf-generic-function-methods gf
@@ -241,7 +242,7 @@
 
     ;;(#j:console:log "!find" gf qualifiers specializers)
 
-    (#j:console:log "find method !!" (generic-function-name gf))
+    ;;(#j:console:log "find method !!" (generic-function-name gf))
 
     (let ((method
             (find-if #'(lambda (it)
@@ -255,7 +256,7 @@
                                        (!method-specializers it))))
                      (generic-function-methods gf))))
 
-        (#j:console:log "find-method" method)
+        ;;(#j:console:log "find-method" method)
 
         (if (and (null method) errorp)
             (error "No such method for ~S." (generic-function-name gf))
@@ -439,23 +440,7 @@
 
 
 (defun compile-in-lexical-environment (lambda-expr)
-    ;;(print* 'compile lambda-expr)
     (eval `(function ,lambda-expr)))
-
-
-;;; macro
-
-#+nil
-(defmacro def!method (&rest args)
-    (multiple-value-bind (function-name qualifiers lambda-list specializers body)
-        (parse-defmethod args)
-        `(prog1 ',function-name
-             (ensure-method (find-generic-function ',function-name)
-                            :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
-                            :qualifiers ,(canonicalize-defgeneric-ll qualifiers)
-                            :specializers ,(canonicalize-specializers specializers)
-                            :body ',body))))
-
 
 
 ;;; EOF
