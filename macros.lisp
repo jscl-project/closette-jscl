@@ -5,6 +5,7 @@
 
 (push :mop *features*)
 
+#+nil
 (defmacro defclass (name direct-superclasses direct-slots &rest options)
     `(progn
          (ensure-class ',name
@@ -16,6 +17,18 @@
          ',name))
 
 
+(defmacro defclass (name direct-superclasses direct-slots &rest options)
+    ;;`(progn
+    `(ensure-class ',name
+                   :direct-superclasses
+                   ,(canonicalize-direct-superclasses direct-superclasses)
+                   :direct-slots
+                   ,(canonicalize-direct-slots direct-slots)
+                   ,@(canonicalize-defclass-options options)))
+;;',name))
+
+
+#+nil
 (defmacro defgeneric (function-name lambda-list &rest options)
     `(prog1 ',function-name
          (!ensure-generic-function
@@ -23,16 +36,24 @@
           :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
           ,@(canonicalize-defgeneric-options options))))
 
+(defmacro defgeneric (function-name lambda-list &rest options)
+    ;;`(prog1 ',function-name
+    `(!ensure-generic-function
+      ',function-name
+      :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
+      ,@(canonicalize-defgeneric-options options)))
+
+
 
 (defmacro defmethod (&rest args)
     (multiple-value-bind (function-name qualifiers lambda-list specializers body)
         (parse-defmethod args)
-        `(prog1 ',function-name
-             (ensure-method (find-generic-function ',function-name)
-                            :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
-                            :qualifiers ,(canonicalize-defgeneric-ll qualifiers)
-                            :specializers ,(canonicalize-specializers specializers)
-                            :body ',body))))
+        ;;`(prog1 ',function-name
+        `(ensure-method (find-generic-function ',function-name)
+                        :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
+                        :qualifiers ,(canonicalize-defgeneric-ll qualifiers)
+                        :specializers ,(canonicalize-specializers specializers)
+                        :body ',body)))
 
 
 (defmacro with-slots ((&rest slots) instance-name &body forms)
