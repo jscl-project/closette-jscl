@@ -119,8 +119,8 @@
                   :direct-superclasses '()
                   :direct-slots   '())
 
-    #+nil
-    (ensure-class 'hashtable
+
+    (ensure-class 'hash-table
                   :direct-superclasses '()
                   :direct-slots   '())
 
