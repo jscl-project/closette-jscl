@@ -115,6 +115,7 @@
                                slot-name class)
                         pos))))))
 
+
 ;;; slot-contents
 (defun slot-contents (slots location)
     (aref slots location))
@@ -133,10 +134,6 @@
                    slot-name instance)
             val)))
 
-(defun setf-std-slot-value (instance slot-name new-value)
-    (let ((location (slot-location (!class-of instance) slot-name))
-          (slots (std-instance-slots instance)))
-        (setf-slot-contents slots location new-value)))
 
 
 ;;; slot-value
@@ -204,7 +201,8 @@
 
 (defun built-in-class-of (x)
     (typecase x
-      ;;(null                         (find-class 'null))
+      (null                         (find-class 'null))
+      (hash-table                   (find-class 'hash-table))
       (symbol                       (!find-class 'symbol))
       (integer                      (!find-class 'integer))
       (float                        (!find-class 'float))
