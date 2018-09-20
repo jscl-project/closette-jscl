@@ -1,13 +1,16 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
+;;; -*- mode:lisp; coding:utf-8 -*-
 
 
-(defpackage :closette.system
+#+jscl
+(defpackage :closette
   (:use :cl))
 
+#+jscl
+(in-package :closette)
 
-(in-package :closette.system)
-
+#+jscl
 (eval-when (:compile-toplevel :load-toplevel :execute)
     (defparameter +closette-symbols+
       '(#:defclass #:defgeneric #:defmethod
@@ -57,9 +60,15 @@
         #:find-generic-function         ; Necessary artifact of this implementation
         )))
 
-
-(defpackage :closette
+#+jscl
+(defpackage :mop
   (:use :cl)
   #.(cons :export +closette-symbols+))
+
+#-jscl
+(defpackage :mop
+  (:use :cl))
+
+
 
 ;;; EOF

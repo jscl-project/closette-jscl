@@ -9,3 +9,5 @@ $RECYCLE.BIN/
 .#*
 templ.lisp
 t/
+orig/
+amop/

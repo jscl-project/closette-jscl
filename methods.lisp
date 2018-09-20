@@ -1,6 +1,6 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(in-package #:closette)
+;;;(in-package :amop)
 
 
 (defgeneric print-object (instance stream))
@@ -13,19 +13,25 @@
 
 ;;; Slot access
 
+
 (defgeneric slot-value-using-class (class instance slot-name))
 (defmethod slot-value-using-class ((class standard-class) instance slot-name)
     (std-slot-value instance slot-name))
 
+#|
 (defgeneric set-slot-value-using-class (instance slot-name new-value))
 (defmethod set-slot-value-using-class  ((instance standard-class) slot-name new-value)
     (setf (std-slot-value instance slot-name) new-value))
 
 ;;; N.B. To avoid making a forward reference to a (setf xxx) generic function:
 (defsetf slot-value-using-class set-slot-value-using-class)
+|#
 
-(defun setf-slot-value-using-class (new-value class object slot-name)
+#|
+(defun (setf slot-value-using-class) (new-value class object slot-name)
     (setf (slot-value-using-class class object slot-name) new-value))
+
+|#
 
 (defgeneric slot-exists-p-using-class (class instance slot-name))
 (defmethod slot-exists-p-using-class
@@ -44,6 +50,7 @@
 
 ;;; Instance creation and initialization
 
+
 (defgeneric allocate-instance (class))
 
 (defmethod allocate-instance ((class standard-class))
@@ -51,7 +58,11 @@
 
 (defgeneric make-instance (class &key))
 
+;;;(defgeneric make-instance (class &rest))
+
+
 (defmethod make-instance ((class standard-class) &rest initargs)
+    ;;(#j:console:log "make-instance-class" (format nil "~a" (class-name class)) initargs)
     (let ((instance (allocate-instance class)))
         (apply #'initialize-instance instance initargs)
         instance))
@@ -70,13 +81,12 @@
     (apply #'shared-initialize instance () initargs))
 
 (defgeneric shared-initialize (instance slot-names &key))
-(defmethod shared-initialize ((instance standard-object)
-                              slot-names &rest all-keys)
+(defmethod shared-initialize ((instance standard-object) slot-names &rest all-keys)
     (dolist (slot (class-slots (class-of instance)))
         (let ((slot-name (slot-definition-name slot)))
+            ;;(#j:console:log "slot-name" slot-name)
             (multiple-value-bind (init-key init-value foundp)
                 (get-properties all-keys (slot-definition-initargs slot))
-                ;;(format t "init: ~a ~a ~%" init-key init-value foundp)
                 (if foundp
                     (setf (slot-value instance slot-name) init-value)
                     (when (and (not (slot-boundp instance slot-name))
@@ -88,31 +98,29 @@
     instance)
 
 ;;; change-class
+#+nil (defgeneric change-class (instance new-class &key))
+#+nil (defmethod change-class
+          ((old-instance standard-object)
+           (new-class standard-class)
+           &rest initargs)
+          (let ((new-instance (allocate-instance new-class)))
+              (dolist (slot-name (mapcar #'slot-definition-name
+                                         (class-slots new-class)))
+                  (when (and (slot-exists-p old-instance slot-name)
+                             (slot-boundp old-instance slot-name))
+                      (setf (slot-value new-instance slot-name)
+                            (slot-value old-instance slot-name))))
+              (rotatef (std-instance-slots new-instance)
+                       (std-instance-slots old-instance))
+              (rotatef (std-instance-class new-instance)
+                       (std-instance-class old-instance))
+              (apply #'update-instance-for-different-class
+                     new-instance old-instance initargs)
+              old-instance))
 
-;;; bug: rotatef not release
-(defgeneric change-class (instance new-class &key))
-(defmethod change-class
-    ((old-instance standard-object)
-     (new-class standard-class)
-     &rest initargs)
-    (let ((new-instance (allocate-instance new-class)))
-        (dolist (slot-name (mapcar #'slot-definition-name
-                                   (class-slots new-class)))
-            (when (and (slot-exists-p old-instance slot-name)
-                       (slot-boundp old-instance slot-name))
-                (setf (slot-value new-instance slot-name)
-                      (slot-value old-instance slot-name))))
-        (rotatef (std-instance-slots new-instance)
-                 (std-instance-slots old-instance))
-        (rotatef (std-instance-class new-instance)
-                 (std-instance-class old-instance))
-        (apply #'update-instance-for-different-class
-               new-instance old-instance initargs)
-        old-instance))
-
-(defmethod change-class
-    ((instance standard-object) (new-class symbol) &rest initargs)
-    (apply #'change-class instance (find-class new-class) initargs))
+#+nil (defmethod change-class
+          ((instance standard-object) (new-class symbol) &rest initargs)
+          (apply #'change-class instance (find-class new-class) initargs))
 
 (defgeneric update-instance-for-different-class (old new &key))
 (defmethod update-instance-for-different-class
@@ -140,9 +148,9 @@
 
 ;;; Finalize inheritance
 
-(defgeneric finalize-inheritance (class))
-(defmethod finalize-inheritance ((class standard-class))
-    (std-finalize-inheritance class)
+(defgeneric finalize-inheritance (class &rest))
+(defmethod finalize-inheritance ((class standard-class) &rest all-keys)
+    (std-finalize-inheritance class all-keys)
     (values))
 
 ;;; Class precedence lists
@@ -173,8 +181,15 @@
                 (generic-function-name gf)))
     gf)
 
+#+nil
 (defmethod initialize-instance :after ((gf standard-generic-function) &key)
     (finalize-generic-function gf))
+
+;;; mvk change &key to &rest args
+(defmethod initialize-instance :after ((gf standard-generic-function) &rest args)
+    (finalize-generic-function gf))
+
+
 
 ;;;
 ;;; Methods having to do with method metaobjects.
@@ -191,7 +206,12 @@
                         (method-specializers method))))
     method)
 
-(defmethod initialize-instance :after ((method standard-method) &key)
+;;; mvk add &rest
+#+nil
+(defmethod initialize-instance :after ((method standard-method) &rest args)
+    (setf-method-function method (compute-method-function method)))
+
+(defmethod initialize-instance :after ((method standard-method) &rest args)
     (setf (method-function method) (compute-method-function method)))
 
 ;;;
@@ -216,49 +236,8 @@
 (defmethod compute-method-function ((method standard-method))
     (std-compute-method-function method))
 
-;;; describe-object is a handy tool for enquiring minds:
-
-(defgeneric describe-object-content (obj))
-
-(defmethod describe-object-content ((object standard-object)) (list 'cn (class-name object)))
-(defmethod describe-object-content ((object list)) (list 'list 'length (length object)))
-(defmethod describe-object-content ((object array)) (list 'array 'length (length object)))
-(defmethod describe-object-content ((object string)) (list 'string 'length (length object) object))
-(defmethod describe-object-content ((object symbol)) (list 'symbol object))
-(defmethod describe-object-content ((object number)) (list 'number object))
-(defmethod describe-object-content (object) "Damn know what is it")
-
-
-(defgeneric describe-object (object stream))
-
-(defmethod describe-object ((object standard-object) stream)
-    (let ((value))
-        (format t "A Closette object ~S ~S  representation:~%"  (class-name object)
-                (class-name (class-of object)))
-        (dolist (sn (mapcar #'closette::slot-definition-name (closette::class-slots (class-of object))))
-            (format t "    ~a ~a <- "  sn  (if (slot-boundp object sn) "{bound}" "{unbound}"))
-            (setq value (and (slot-boundp object sn) (slot-value object sn)))
-            (case sn
-              (closette::name
-               (format t "~a~%" value))
-              ((closette::superclasses closette::class-precedence-list closette::direct-subclasses)
-               (format t "~a~%" (mapcar #'class-name value)))
-              (closette::effective-slots
-               (format t "~a~%" (describe-object-content value)))
-              (closette::direct-slots
-               (format t "~a~%" (mapcar #'closette::slot-definition-name  value)))
-              (closette::direct-methods (describe-object-content value))
-              (otherwise (format t "~a~%" (describe-object-content value)))))
-        (values)))
-
-(defmethod describe-object ((object t) stream)
-    (describe object)
-    (values))
 
 
 ;;; ancient as a mammoth shit
-;;; (format t "~%Closette is a Knights of the Lambda Calculus production.")
-
-(in-package :cl-user)
 
 ;;; EOF
